@@ -12,6 +12,8 @@ std::vector<Token> Lexer::tokenize() {
 		/* id literals */
 		if (isAlpha(peek())) tokens.push_back(identifier());
 
+		else if (isAtEnd()) break;
+
 		/* number literals */
         else if (std::isdigit(peek())) tokens.push_back(number());
 
@@ -172,6 +174,8 @@ void Lexer::reportError(const std::string& message) const {
 /* keywords map */
 static const std::unordered_map<std::string, TokenType> keywords = {
 	{"main", TokenType::MAIN},
+	{"true", TokenType::TRUE},
+	{"false", TokenType::FALSE},
 	{"sia", TokenType::SIA},
 	{"stampa", TokenType::STAMPA},
 	{"se", TokenType::SE},
@@ -218,8 +222,8 @@ Token Lexer::string() {
     }
 
     if (isAtEnd()) {
-		reportError("Unterminated string.");
-		return makeToken(TokenType::UNKNOWN, "???");
+		reportError("Unterminated string:");
+		return makeToken(TokenType::UNKNOWN, source.substr(start + 1, current - start - 1));
     }
 
     advance(); // consuma chiusura "

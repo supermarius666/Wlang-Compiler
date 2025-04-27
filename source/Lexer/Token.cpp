@@ -8,6 +8,8 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::FUN:           		return "FUN";
         case TokenType::COMMA:              return "COMMA";
         case TokenType::DOT:                return "DOT";
+        case TokenType::TRUE:               return "TRUE";
+        case TokenType::FALSE:              return "FALSE";
         case TokenType::NUMBER:             return "NUMBER";
         case TokenType::STRING:             return "STRING";
         case TokenType::ALTRIMENTI:         return "ALTRIMENTI";

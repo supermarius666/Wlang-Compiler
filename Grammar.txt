@@ -1,0 +1,18 @@
+grammar v.1
+
+expression	->	literal 
+			|	unary
+			|	binary
+			|	grouping	;
+
+literal		->	NUMBER | STRING | "true" | "false"	;
+grouping	->	"(" expression ")"	;
+unary		->	( "-" | "!" ) expression	;
+binary		->	expression	operator	expression	;
+operator	->	"==" | "!="	| "<" | "<=" | ">" | ">=" |
+				"+"  |  "-" | "*" | "/"	;
+
+
+lowercase 	--> for production rules (non terminals)
+" "		  	--> for terminals (tokens)
+capitalize	--> for  terminals that are a single lexeme whose text representation may vary.

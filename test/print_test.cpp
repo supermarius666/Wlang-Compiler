@@ -30,26 +30,16 @@ int main(int argc, char **argv) {
 
     if (argc == 2) {
 		
-		/* get the source code */
-        std::ifstream inputFile(argv[1]);
-        if (!inputFile.is_open()) {
-            std::cerr << "Could not open file: " << argv[1] << std::endl;
-            return 1;
-        }
+		std::unique_ptr<Expr> expr = std::make_unique<BinaryExpr>(
+			std::make_unique<LiteralExpr>(Token(TokenType::NUMBER, "3", 1)),
+			std::make_unique<LiteralExpr>(Token(TokenType::NUMBER, "4", 1)),
+			Token(TokenType::PLUS, "+", 1)
+		);
 
-       /* all code in one place --> single string */
-        std::string sourceCode(
-            (std::istreambuf_iterator<char>(inputFile)),
-            std::istreambuf_iterator<char>()
-        );
-        	 
-        Lexer lexer(sourceCode);
-        auto tokens = lexer.tokenize();
+		ASTPrinter printer;
 
-        // for (Token t: tokens) {
-        //     std::cout << BLUE << "Token: " << RESET << MAGENTA << t.lexeme << RESET << RED <<" (Type: " << tokenTypeToString(t.type) << ")\n" << RESET;
-        // }  
-
+		printer.printExpr(expr.get(), 0);
+	
     }
 
     return 0;
