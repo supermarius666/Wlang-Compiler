@@ -8,8 +8,8 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::FUN:           		return "FUN";
         case TokenType::COMMA:              return "COMMA";
         case TokenType::DOT:                return "DOT";
-        case TokenType::TRUE:               return "TRUE";
-        case TokenType::FALSE:              return "FALSE";
+        case TokenType::VERO:               return "TRUE";
+        case TokenType::FALSO:              return "FALSE";
         case TokenType::NUMBER:             return "NUMBER";
         case TokenType::STRING:             return "STRING";
         case TokenType::ALTRIMENTI:         return "ALTRIMENTI";
@@ -27,9 +27,9 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::GREATER_EQUAL:      return "GREATER_EQUAL";
         case TokenType::LESS:               return "LESS";
         case TokenType::LESS_EQUAL:         return "LESS_EQUAL";
-        case TokenType::AND:                return "AND";
-        case TokenType::OR:                 return "OR";
-        case TokenType::NOT:                return "NOT";
+        case TokenType::E:                  return "AND";
+        case TokenType::O:                  return "OR";
+        case TokenType::NON:                return "NOT";
         case TokenType::LEFT_PAREN:         return "LEFT_PAREN";
         case TokenType::RIGHT_PAREN:        return "RIGHT_PAREN";
         case TokenType::LEFT_BRACE:         return "LEFT_BRACE";

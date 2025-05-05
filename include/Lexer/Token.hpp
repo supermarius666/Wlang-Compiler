@@ -10,7 +10,7 @@ enum class TokenType {
 
 	/* Keywords */
 	SIA, STAMPA, SE, ALTRIMENTI,
-	AND, OR, NOT, TRUE, FALSE, MAIN, FUN,
+	E, O, NON, VERO, FALSO, MAIN, FUN,
 
 	/* Arithmetic operators */
 	PLUS, MINUS, STAR, SLASH, EQUAL, NOT_EQUAL,

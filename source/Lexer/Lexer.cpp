@@ -174,16 +174,16 @@ void Lexer::reportError(const std::string& message) const {
 /* keywords map */
 static const std::unordered_map<std::string, TokenType> keywords = {
 	{"main", TokenType::MAIN},
-	{"true", TokenType::TRUE},
-	{"false", TokenType::FALSE},
+	{"vero", TokenType::VERO},
+	{"falso", TokenType::FALSO},
 	{"sia", TokenType::SIA},
 	{"stampa", TokenType::STAMPA},
 	{"se", TokenType::SE},
 	{"altrimenti", TokenType::ALTRIMENTI},
 	{"fun", TokenType::FUN},
-	{"and", TokenType::AND},
-	{"or", TokenType::OR},
-	{"not", TokenType::NOT},
+	{"e", TokenType::E},
+	{"o", TokenType::O},
+	{"non", TokenType::NON},
 };
 
 

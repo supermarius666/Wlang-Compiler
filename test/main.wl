@@ -1,0 +1,1 @@
+se (a == vero o b == falso)

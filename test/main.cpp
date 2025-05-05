@@ -1,6 +1,5 @@
 #include "../include/Lexer/Lexer.hpp"
 #include "../include/Lexer/Utils.hpp"
-#include "../include/Parser/Printer.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -46,9 +45,9 @@ int main(int argc, char **argv) {
         Lexer lexer(sourceCode);
         auto tokens = lexer.tokenize();
 
-        // for (Token t: tokens) {
-        //     std::cout << BLUE << "Token: " << RESET << MAGENTA << t.lexeme << RESET << RED <<" (Type: " << tokenTypeToString(t.type) << ")\n" << RESET;
-        // }  
+        for (Token t: tokens) {
+            std::cout << BLUE << "Token: " << RESET << MAGENTA << t.lexeme << RESET << RED <<" (Type: " << tokenTypeToString(t.type) << ")\n" << RESET;
+        }  
 
     }
 
