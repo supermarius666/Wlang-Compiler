@@ -3,6 +3,7 @@
 
 # include "common.h"
 # include "memory.h"
+# include "value.h"
 
 
 /**
@@ -13,6 +14,7 @@
  * utilized during code generation in the Wlang compiler.
  */
 typedef enum {
+	OP_CONSTANT,	/* for constant instructions like print (stampa)  --> takes a single byte operand that specifies which constant to load from the chunk's constant array*/
 	OP_RETURN,
 }	OpCode;
 
@@ -24,9 +26,10 @@ typedef enum {
  * or data for the compiler's code generation phase.
  */
 typedef struct {
-	int		count;		/* how many spots are in use */
-	int		capacity;	/* capacity of the dynamic array */
-	uint8_t	*code;		/* array of bytes */
+	int			count;		/* how many spots are in use */
+	int			capacity;	/* capacity of the dynamic array */
+	uint8_t		*code;		/* array of bytes */
+	ValueArray	constants;	/* constants values (literals)*/
 }	Chunk;
 
 /* methods */
@@ -63,5 +66,6 @@ void	freeChunk(Chunk *chunk);
  */
 void	writeChunk(Chunk *chunk, uint8_t byte);
 
+int		addConstant(Chunk *chunk, Value value);
 
 #endif
