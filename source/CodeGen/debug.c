@@ -34,6 +34,11 @@ int		disassembleInstruction(Chunk *chunk, int offset)
 {
 	uint8_t	instruction;
 	
+	if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1])
+		printf("    | ");
+	else
+		printf("%4d ", chunk->lines[offset]);
+	
 	printf("%04d ", offset);
 	instruction = chunk->code[offset];
 	switch (instruction)

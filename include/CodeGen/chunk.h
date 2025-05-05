@@ -29,6 +29,7 @@ typedef struct {
 	int			count;		/* how many spots are in use */
 	int			capacity;	/* capacity of the dynamic array */
 	uint8_t		*code;		/* array of bytes */
+	int			*lines;		/*line numers*/
 	ValueArray	constants;	/* constants values (literals)*/
 }	Chunk;
 
@@ -64,7 +65,7 @@ void	freeChunk(Chunk *chunk);
  * @param chunk A pointer to the Chunk structure where the byte will be written.
  * @param byte The byte value to be written to the chunk.
  */
-void	writeChunk(Chunk *chunk, uint8_t byte);
+void	writeChunk(Chunk *chunk, uint8_t byte, int line);
 
 int		addConstant(Chunk *chunk, Value value);
 
