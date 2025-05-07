@@ -27,8 +27,8 @@ void	initVm();
 /* free the Vm*/
 void	freeVm();
 
-/* interpreta il codice del chunk passato alla Vm*/
-InterpretResult	interpret(Chunk *chunk);
+/* interpreta il codice passato alla Vm*/
+InterpretResult	interpret(const char *source);
 
 /* push sulla stack */
 void	push(Value value);
