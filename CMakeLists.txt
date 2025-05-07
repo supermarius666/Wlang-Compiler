@@ -10,6 +10,7 @@ add_executable(wlang
     source/CodeGen/chunk.c
     source/CodeGen/debug.c
     source/CodeGen/value.c
+    source/VM/vm.c
 )
 
 target_include_directories(wlang
