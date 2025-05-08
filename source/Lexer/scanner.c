@@ -79,28 +79,24 @@ static void	skipWhiteSpace()
 		case '/':
 		{
 			/* commento su singola linea --> i commenti non sono salvati come token, vengono ignorati */
-			if (peekNext('/'))
+			if (peekNext() == '/')
 				while ((peek() != '\n') && (!isAtEnd())) advance();
 			
 			/* commento su più righe --> come su C */
-			// else if (match('*'))
-			// {
-			// 	while (!isAtEnd())
-			// 	{
-			// 		if ((peek() == '*') && (peekNext() == '/'))
-			// 		{
-			// 			advance();	/* consuma '*' */
-			// 			advance();  /* consuma '/' */
-			// 			break;
-			// 		}
-			// 		else
-			// 		{
-			// 			if (peek() == '\n') scanner.line++;
-			// 			advance();
-			// 		}
-			// 	}
-			// 	break;
-			// }
+			else if (peekNext() == '*') {
+				advance(); // Consuma '/'
+				advance(); // Consuma '*'
+				while (!isAtEnd()) {
+					if (peek() == '*' && peekNext() == '/') {
+						advance(); // Consuma '*'
+						advance(); // Consuma '/'
+						break; // Esci dal ciclo se commento terminato
+					}
+					if (peek() == '\n') scanner.line++;
+					
+					advance();
+				}
+			}
 			/* divisione */
 			else
 				return;
