@@ -4,6 +4,7 @@
 #include "../../include/VM/vm.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static char *readFile(const char *path)
 {
@@ -59,7 +60,7 @@ int main(int argc, char **argv)
 		printf("         Empowering your code with precision and power.\t\t\n");
 		printf("        Official Version: 1.0 - Build 2025-04-23\t\t\n");
 		printf("==========================================================================\n");
-		printf("Usage: wlang <file.wl>\n");
+		printf("Usage: wlang -name executable_name <files.wl>\n");
 		printf("This compiler is licensed under the Wlang Open License (WOL).\n");
 		printf("Redistribution and usage in source and binary forms, with or without modification,\n");
 		printf("are permitted provided that the following conditions are met:\n");
@@ -71,12 +72,25 @@ int main(int argc, char **argv)
 		freeVm();									// libera Vm
 		return (0);
 
-	}	
-	if (argc > 2) {
-		fprintf(stderr, "Invalid usage\n");
+	}
+	else if (argc != 4 || strcmp(argv[1], "-name") != 0) {
+		fprintf(stderr, "Uso: %s -name nome_eseguibile file.wl\n", argv[0]);
         return 1;
-    }
-	if (argc == 2)
-		runFile(argv[1]);
+	}
+	else
+	{
+		/* parte che creerà il file binario .wlb*/
+		const char* output_name = argv[2];
+		const char* input_path = argv[3];
+		runFile(argv[3]);
+		char filename[256];
+		snprintf(filename, sizeof(filename), "%s.wlb", output_name);
+		FILE* out = fopen(filename, "wb");
+		if (!out) {
+			perror("Errore creazione eseguibile");
+			return 1;
+		}
+	}
+		
 	return (0);
 }

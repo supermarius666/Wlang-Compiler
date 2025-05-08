@@ -14,7 +14,10 @@ fun main(args)
 	se (a <= 3) {
 		stampa("problema")!!
 	} altrimenti {
-		stampa("wow")!!
+		stampa("wow
+				questa è una stringa su
+				più righe
+				")!!
 	}
 	
 }
