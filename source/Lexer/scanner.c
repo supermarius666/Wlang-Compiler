@@ -74,6 +74,39 @@ static void	skipWhiteSpace()
 			advance();
 			break;
 		}
+
+		/* commenti */
+		case '/':
+		{
+			/* commento su singola linea --> i commenti non sono salvati come token, vengono ignorati */
+			if (peekNext('/'))
+				while ((peek() != '\n') && (!isAtEnd())) advance();
+			
+			/* commento su più righe --> come su C */
+			// else if (match('*'))
+			// {
+			// 	while (!isAtEnd())
+			// 	{
+			// 		if ((peek() == '*') && (peekNext() == '/'))
+			// 		{
+			// 			advance();	/* consuma '*' */
+			// 			advance();  /* consuma '/' */
+			// 			break;
+			// 		}
+			// 		else
+			// 		{
+			// 			if (peek() == '\n') scanner.line++;
+			// 			advance();
+			// 		}
+			// 	}
+			// 	break;
+			// }
+			/* divisione */
+			else
+				return;
+			break;
+		}
+		
 		default:
 			return;
 		}	
@@ -121,6 +154,7 @@ Token	scanToken()
 		case '+': return (makeToken(PLUS));
 		case '-': return (makeToken(MINUS));
 		case '*': return (makeToken(STAR));
+		case '/': return (makeToken(SLASH));
 
 		/* lexing di due caratteri */
 		case '!':
@@ -146,36 +180,6 @@ Token	scanToken()
 			return (makeToken(
 				match('=') ? GREATER_EQUAL : GREATER
 			));
-		}
-
-		/* commenti */
-		case '/':
-		{
-			/* commento su singola linea --> i commenti non sono salvati come token, vengono ignorati */
-			if (match('/'))
-				while ((peek() != '\n') && !isAtEnd()) advance();
-			
-			/* commento su più righe --> come su C */
-			else if (match('*'))
-			{
-				while (!isAtEnd())
-				{
-					if ((peek() == '*') && (peekNext() == '/'))
-					{
-						advance();	/* consuma '*' */
-						advance();  /* consuma '/' */
-					}
-					else
-					{
-						if (peek() == '\n') scanner.line++;
-						advance();
-					}
-				}
-			}
-			/* divisione */
-			else
-				return (makeToken(SLASH));
-			
 		}
 	}
 
