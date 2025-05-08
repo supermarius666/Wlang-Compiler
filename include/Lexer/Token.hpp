@@ -22,7 +22,10 @@ enum class TokenType {
 	END_STM,  UNKNOWN, ERROR,
 
 	/* End of file */
-	EOF_TOKEN
+	EOF_TOKEN,
+
+	/* Error Token */
+	ERROR_TOKEN
 };
 
 /* token struct */

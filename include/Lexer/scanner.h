@@ -8,7 +8,37 @@ typedef struct {
 	int			line;
 }	Scanner;
 
+typedef enum{
+    /* Literals */
+	IDENTIFIER, NUMBER, STRING,
+
+	/* Keywords */
+	SIA, STAMPA, SE, ALTRIMENTI,
+	E, O, NON, VERO, FALSO, MAIN, FUN,
+
+	/* Arithmetic operators */
+	PLUS, MINUS, STAR, SLASH, EQUAL, NOT_EQUAL,
+	GREATER, GREATER_EQUAL, LESS, LESS_EQUAL,
+
+	/* Punctuation, Parentheses and Others */
+	SEMICOLON, COMMA, DOT, EQUALEQUAL,
+	LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
+	END_STM, ERROR,
+
+	/* End of file */
+	EOF_TOKEN
+}	TokenType;
+
+typedef struct {
+	TokenType	type;		/* tipo token */
+	const char	*start;		/* inizio token */
+	int			lenght;		/* lunghezza token */
+	int			line;		/* linea sulla quale si trova il token */
+}	Token;
+
 /* inizializza lo scanner */
 void	initScanner(const char *source);
 
+/* fa lo scan di un token alla volta e usa direttamente il codice sorgente senza allocare nulla --> i token sono passati per valore */
+Token	scanToken();
 #endif

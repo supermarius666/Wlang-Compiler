@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static readFile(const char *path)
+static char *readFile(const char *path)
 {
 	FILE *file = fopen(path, "rb");
 	if (!file)

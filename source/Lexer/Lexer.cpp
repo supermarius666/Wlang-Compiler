@@ -73,7 +73,7 @@ std::vector<Token> Lexer::tokenize() {
 					if (match('=')) tokens.push_back(makeToken(TokenType::GREATER_EQUAL, ">="));
 					else tokens.push_back(makeToken(TokenType::GREATER, ">"));
 					break;
-					default:
+				default:
 					if (isspace(c)) {
 						if (c == '\n') line++;
 					} else {

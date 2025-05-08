@@ -1,1 +1,1 @@
-se (a == vero o b == falso)
+(a + b) / 2;j
