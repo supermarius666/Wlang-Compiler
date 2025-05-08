@@ -2,6 +2,7 @@
 #include "../../include/Lexer/scanner.h"
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 /* variabile globale scanner (lexer)*/
 Scanner	scanner;
@@ -40,6 +41,14 @@ static bool match(char expected)
 
 	scanner.current++;
 	return (true);
+}
+
+static bool	isAlpha(char c)
+{
+	return ((c >= 'a' && c <= 'z') ||
+			(c >= 'A' && c <= 'Z') ||
+			(c == '_')
+		);
 }
 
 /* questa funzione costruisce e restituisce un token --> il token fa riferimento direttamente al valore presente nel codice sorgente */
@@ -109,6 +118,67 @@ static void	skipWhiteSpace()
 	}
 }
 
+static TokenType	checkKeyword(int start, int lenght, const char *rest, TokenType type)
+{
+	/* controllo che anche le lettere dopo siano giuste nella keyword */
+	if (((scanner.current - scanner.start) == (start + lenght)) && (memcmp(scanner.start, rest, lenght) == 0))
+		return (type);
+}
+
+/*	funzione che di verifica che l'identifier è una keyword 
+*	per farlo si una struttura dati detta 'trie' --> si tratta di un DFA, molto usato per robe del genere 
+*/
+static TokenType identifierType()
+{
+	switch (scanner.start[0])
+	{
+		case 'm': return (checkKeyword(1, 3,  "ain",  MAIN));
+		case 'v': return (checkKeyword(1, 3,  "ero",  VERO));
+		case 'f': 
+		{
+			if ((scanner.current - scanner.start) > 1)
+			{
+				switch (scanner.start[1])
+				{
+				case 'a':
+					return (checkKeyword(2, 3,  "lso",  VERO));
+				
+				case 'u':
+					return (checkKeyword(2, 1,  "n",  VERO));
+				
+				}
+			}
+		}	
+		case 's': 
+		{
+			if ((scanner.current - scanner.start) > 1)
+			{
+				switch (scanner.start[1])
+				{
+				case 'i':
+					return (checkKeyword(2, 1,  "a",  SIA));
+				
+				case 'e':
+					return (checkKeyword(2, 0,  "",  SE));
+				
+				case 't':
+					return (checkKeyword(1, 4,  "ampa",  STAMPA));				
+				}	
+			}	
+		}
+		case 'a': return (checkKeyword(1, 9,  "ltrimenti",  ALTRIMENTI));
+		case 'e': return (checkKeyword(1, 1,  "e",  E));
+		case 'o': return (checkKeyword(1, 1,  "o",  O));
+		case 'n': return (checkKeyword(1, 3,  "on",  NON));
+			
+	default:
+		break;
+	}
+
+	return IDENTIFIER;
+}
+
+
 /* in caso di errore su un token viene generato un token di errore che contiene un messaggio di errore */
 static Token	errorToken(const char *message)
 {
@@ -129,6 +199,44 @@ void	initScanner(const char *source)
 	scanner.line = 1;
 }
 
+/* trova i token stringa */
+static Token	string()
+{
+	while ((peek() != '"') && (!isAtEnd()))
+	{
+		if (peek() == '\n') scanner.line++;
+		advance();
+	}
+
+	if (isAtEnd()) return (errorToken("Untermined String."));
+
+	advance();
+	return (makeToken(STRING));
+}
+
+/* token numeri */
+static Token	number()
+{
+	while (isdigit(peek())) advance();
+
+	// per numeri con la virgola 
+	if ((peek() == '.') && (isdigit(peekNext())))
+	{
+		advance();
+		while (isdigit(peek())) advance();
+	}
+	return (makeToken(NUMBER));
+}
+
+/* token identifier */
+static Token identifier()
+{
+	while (isAlpha(peek()) || isdigit(peek())) advance();
+
+	return (makeToken(IDENTIFIER));
+}
+
+
 Token	scanToken()
 {
 	skipWhiteSpace();
@@ -137,6 +245,8 @@ Token	scanToken()
 	if (isAtEnd()) return makeToken(EOF_TOKEN);
 
 	char c = advance();
+	if (isdigit(c)) return (number());
+	if (isAlpha(c)) return (identifier());
 	switch (c)
 	{	
 		/* lexing di sigoli caratteri */
@@ -177,6 +287,9 @@ Token	scanToken()
 				match('=') ? GREATER_EQUAL : GREATER
 			));
 		}
+
+		/* literals */
+		case '"': return (string());
 	}
 
 	return errorToken("Unexpected character.");
