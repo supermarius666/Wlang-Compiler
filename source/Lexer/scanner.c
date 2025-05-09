@@ -132,7 +132,19 @@ static TokenType identifierType()
 {
 	switch (scanner.start[0])
 	{
-		case 'm': return (checkKeyword(1, 3,  "ain",  MAIN));
+		case 'm': 
+		{
+			if ((scanner.current - scanner.start) > 1)
+			{
+				switch (scanner.start[1])
+				{
+				case 'e':
+					return (checkKeyword(2, 4,  "ntre",  MENTRE));
+				case 'a':
+					return (checkKeyword(2, 2,  "in",  MAIN));
+				}
+			}
+		}
 		case 'v': return (checkKeyword(1, 3,  "ero",  VERO));
 		case 'f': 
 		{
@@ -144,7 +156,7 @@ static TokenType identifierType()
 					return (checkKeyword(2, 3,  "lso",  VERO));
 				
 				case 'u':
-					return (checkKeyword(2, 1,  "n",  VERO));
+					return (checkKeyword(2, 1,  "n",  FUN));
 				
 				}
 			}
@@ -169,7 +181,20 @@ static TokenType identifierType()
 		case 'a': return (checkKeyword(1, 9,  "ltrimenti",  ALTRIMENTI));
 		case 'e': return (checkKeyword(1, 1,  "e",  E));
 		case 'o': return (checkKeyword(1, 1,  "o",  O));
-		case 'n': return (checkKeyword(1, 3,  "on",  NON));
+		case 'r': return (checkKeyword(1, 6,  "itorna",  RETURN));
+		case 'n': 
+		{
+			if ((scanner.current - scanner.start) > 1)
+			{
+				switch (scanner.start[1])
+				{
+					case 'u':
+						return (checkKeyword(2, 3,  "lla",  NULLA));	
+					case 'o':
+						return (checkKeyword(2, 1,  "n",  NON));
+				}	
+			}	
+		}
 			
 	default:
 		break;

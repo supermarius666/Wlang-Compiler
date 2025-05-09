@@ -17,6 +17,7 @@ Lexer’s grammar  -> the alphabet consists of individual characters and the str
 - [ ] Grammar Rappresentation (Backus-Naur form)
 
 Syntactic grammar(Parser's grammar) ->  each “letter” in the alphabet is an entire token and a “string” is a sequence of tokens, an entire expression.
+Single-Pass Compilation --> Parser ricorsivo 
 
 ### Grammar
 Set of rules. Rules are called productions because they produce strings in the grammar.You can use them to generate strings that are in the grammar.  Strings created this way are called derivations because each is “derived” from the rules of the grammar.
@@ -30,18 +31,6 @@ individual lexemes—tokens coming from the scanner like if or 1234.
 These are called “terminals”, in the sense of an “end point” because they don’t lead to any further rule.
 A nonterminal is a named reference to another rule in the grammar. It
 means “play that rule and insert whatever it produces here”. In this way, the grammar composes.
-
-
-### The Visitor pattern
-The Visitor Pattern is a design pattern that separates algorithms from the object structure on which they operate. It allows adding new operations to a set of classes without modifying them, by defining a visitor class that implements an operation for each type of object in the structure.
-
-Abstract class
-	--> Interpreter
-	--> Printer
-	--> Opimizer 
-
-- [ ] Problems with expr, the Printer and pointers
-
 
 
 ## ByteCode 

@@ -97,9 +97,27 @@ static InterpretResult run()
 # undef READ_BYTE
 }
 
+/* questa funzione chiama il compilatore che si occupa di generare il bytecode */
 InterpretResult	interpret(const char *source)
 {
-	compile(source);
+	Chunk	chunk;
+
+	initChunk(&chunk);
+	if (!compile(source, &chunk))
+	{
+		freeChunk(&chunk);
+		return INTERPRET_COMPILE_ERROR;	
+	}
+
+	/* passo il chunk di bytecode generato dal compiler alla vm per essere eseguit0 --> in futuro vm e compilatore saranno cose diverse*/
+	vm.chunk = &chunk;
+	vm.ip = vm.chunk->code;
+
+	InterpretResult result = run();
+
+	freeChunk(&chunk);
+	return result;
+
 	return INTERPRET_OK;
 }
 
