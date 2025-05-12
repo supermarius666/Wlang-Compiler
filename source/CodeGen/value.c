@@ -31,5 +31,16 @@ void	writeValueArray(ValueArray *array, Value value)
 
 void	printValue(Value value)
 {
-	printf("%g", AS_NUMBER(value)); /* uso %g perché sceglie in automatico se servono le cifre decimali o meno */
+	switch (value.type)
+	{
+		case VAL_BOOL:
+		{
+			printf(AS_BOOL(value) ? "vero" : "falso");
+			break;
+		}
+		case VAL_NIL: printf("nulla"); break; 
+		case VAL_NUMBER: printf("%g", AS_NUMBER(value)); break;  /* uso %g perché sceglie in automatico se servono le cifre decimali o meno */
+		default:
+			break;
+	}
 }

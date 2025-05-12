@@ -20,6 +20,7 @@ Chunk	*compilingChunk;
 static void	parsePrecedence(Precedence precedence);
 static void expression();
 static void	binary();
+static void	literal();
 
 
 /* ritorna il chunk attuale */
@@ -38,7 +39,7 @@ static void	errorAt(Token *token, const char *message)
 
 	if (token->type == EOF) fprintf(stderr, " at end");
 	else if (token->type == ERROR) { /* nulla */ }
-	else fprintf(stderr, " at '%.*s", token->lenght, token->start);
+	else fprintf(stderr, " at '%.*s'", token->lenght, token->start);
 	
 	fprintf(stderr, ": %s\n", message);
 	parser.hadError = true;
@@ -200,8 +201,8 @@ ParseRule rules []= {
 	[E]						=	{NULL, NULL, PREC_NONE},
 	[ALTRIMENTI]			=	{NULL, NULL, PREC_NONE},
 	[SE]					=	{NULL, NULL, PREC_NONE},
-	[VERO]					=	{NULL, NULL, PREC_NONE},
-	[FALSO]					=	{NULL, NULL, PREC_NONE},
+	[VERO]					=	{literal, NULL, PREC_NONE},
+	[FALSO]					=	{literal, NULL, PREC_NONE},
 	[STAMPA]				=	{NULL, NULL, PREC_NONE},
 	[O]						=	{NULL, NULL, PREC_NONE},
 	[SE]					=	{NULL, NULL, PREC_NONE},
@@ -211,7 +212,7 @@ ParseRule rules []= {
 	[EOF_TOKEN]				=	{NULL, NULL, PREC_NONE},
 	[MENTRE]				=	{NULL, NULL, PREC_NONE},
 	[RETURN]				=	{NULL, NULL, PREC_NONE},
-	[NULLA]					=	{NULL, NULL, PREC_NONE},
+	[NULLA]					=	{literal, NULL, PREC_NONE},
 };
 
 /* prende la regola giuta in base al token */
@@ -241,6 +242,19 @@ static void	binary()
 			return;
 	}
 
+}
+
+/* funzione per i literals */
+static void	literal()
+{
+	switch (parser.previous.type)
+	{
+		case VERO: emitByte(OP_TRUE); break;
+		case FALSO: emitByte(OP_FALSE); break;
+		case NULLA: emitByte(OP_NIL); break;
+	default:
+		break;
+	}
 }
 
 /* la funzione che gestisce tutte le funzioni del parser */

@@ -117,7 +117,11 @@ static InterpretResult run()
 				push(NUMBER_VAL(-AS_NUMBER(pop())));
 				break;
 			}
-		
+			
+			/* literals */
+			case OP_NIL: push(NIL_VAL); break;
+			case OP_TRUE: push(BOOL_VAL(true)); break;
+			case OP_FALSE: push(BOOL_VAL(false)); break;
 
 			case OP_RETURN:
 			{

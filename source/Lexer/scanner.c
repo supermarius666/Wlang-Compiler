@@ -121,8 +121,9 @@ static void	skipWhiteSpace()
 static TokenType	checkKeyword(int start, int lenght, const char *rest, TokenType type)
 {
 	/* controllo che anche le lettere dopo siano giuste nella keyword */
-	if (((scanner.current - scanner.start) == (start + lenght)) && (memcmp(scanner.start, rest, lenght) == 0))
+	if (((scanner.current - scanner.start) == (start + lenght)) && (memcmp(scanner.start + start, rest, lenght) == 0))
 		return (type);
+	return IDENTIFIER;
 }
 
 /*	funzione che di verifica che l'identifier è una keyword 
@@ -258,7 +259,7 @@ static Token identifier()
 {
 	while (isAlpha(peek()) || isdigit(peek())) advance();
 
-	return (makeToken(IDENTIFIER));
+	return (makeToken(identifierType()));
 }
 
 
