@@ -31,5 +31,5 @@ void	writeValueArray(ValueArray *array, Value value)
 
 void	printValue(Value value)
 {
-	printf("%g", value); /* uso %g perché sceglie in automatico se servono le cifre decimali o meno */
+	printf("%g", AS_NUMBER(value)); /* uso %g perché sceglie in automatico se servono le cifre decimali o meno */
 }

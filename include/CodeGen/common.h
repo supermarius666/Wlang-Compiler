@@ -8,4 +8,7 @@
 # define DEBUG_TRACE_EXECUTION
 # define DEBUG_PRINT_CODE
 
+extern const char* output_file;
+extern const char* input_path;
+
 #endif

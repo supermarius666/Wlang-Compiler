@@ -139,7 +139,7 @@ static void	endCompiler()
 static void	number()
 {
 	double value = strtod(parser.previous.start, NULL);
-	emitCostant(value);
+	emitCostant(NUMBER_VAL(value));
 }
 
 /* grouping --> cose tra parentesi;  prefix expression --> significa che ha un token particolare con il quale inizia */

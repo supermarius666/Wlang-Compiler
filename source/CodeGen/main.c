@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+const char* output_file = NULL;
+const char* input_path = NULL;
+
 static char *readFile(const char *path)
 {
 	FILE *file = fopen(path, "rb");
@@ -80,11 +83,11 @@ int main(int argc, char **argv)
 	else
 	{
 		/* parte che creerà il file binario .wlb*/
-		const char* output_name = argv[2];
-		const char* input_path = argv[3];
+		output_file = argv[2];
+		input_path = argv[3];
 		runFile(argv[3]);
 		char filename[256];
-		snprintf(filename, sizeof(filename), "%s.wlb", output_name);
+		snprintf(filename, sizeof(filename), "%s.wlb", output_file);
 		FILE* out = fopen(filename, "wb");
 		if (!out) {
 			perror("Errore creazione eseguibile");

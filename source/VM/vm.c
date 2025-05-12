@@ -3,6 +3,7 @@
 #include "../../include/CodeGen/common.h"
 #include "../../include/CodeGen/debug.h"
 #include <stdio.h>
+#include <stdarg.h>
 
 /* Vm come variabile globale */
 Vm	vm;
@@ -11,6 +12,28 @@ Vm	vm;
 static void resetStack() 
 {
 	vm.stackTop = vm.stack;
+}
+
+/* ritorna il valore dalla stack a distance dal dalla testa --> 0 significa elemento in testa */
+static Value	peek(int distance)
+{
+	return vm.stackTop[-1 - distance ];
+}
+
+/* funzione che stampa l'errore e ferma il compilatore */
+static void runtimeError(const char *format, ...)
+{
+	va_list	args;
+	va_start(args, format);
+	vfprintf(stderr, format, args);
+	va_end(args);
+	fputs("\n", stderr);
+
+	size_t instruction = vm.ip - vm.chunk->code - 1;
+	int line = vm.chunk->lines[instruction];
+	fprintf(stderr, "[line %d] in %s\n", line, input_path);
+
+	resetStack();
 }
 
 void	initVm()
@@ -45,11 +68,15 @@ static InterpretResult run()
 # define READ_BYTE() (*(vm.ip++))	// faccio questa def qua perché serve solo qua, infatti, alla fine della funzione faccio undef
 # define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
 /* macro per calcolare le espressioni aritmetiche */
-# define BINARY_OP(op) \
+# define BINARY_OP(valueType, op) \
 	do { \
-		double b = pop(); \
-		double a = pop(); \
-		push(a op b); \
+		if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
+			runtimeError("Operands must be numbers.");	\
+			return INTERPRET_RUNTIME_ERROR;	\
+		} \
+		double b = AS_NUMBER(pop()); 	\
+		double a = AS_NUMBER(pop()); 	\
+		push(valueType(a op b)); 		\
 	} while (false)
 
 	while (true) {
@@ -75,11 +102,22 @@ static InterpretResult run()
 				break;
 			}
 
-			case OP_ADD: BINARY_OP(+); break;
-			case OP_SUB: BINARY_OP(-); break;
-			case OP_DIV: BINARY_OP(/); break;
-			case OP_MUL: BINARY_OP(*); break;
-			case OP_NEGATE: push(-pop()); break;	/* faccio la negazione dell'numero poi lo pusho sulla stack */
+			case OP_ADD: BINARY_OP(NUMBER_VAL, +); break;
+			case OP_SUB: BINARY_OP(NUMBER_VAL, -); break;
+			case OP_DIV: BINARY_OP(NUMBER_VAL, /); break;
+			case OP_MUL: BINARY_OP(NUMBER_VAL, *); break;
+			case OP_NEGATE:
+			{
+				/* validazione: verifico che in ho un numero in testa alla stack --> se non è un numero genero errore e fermo tutto */
+				if (!IS_NUMBER(peek(0)))
+				{
+					runtimeError("Operand must be a number.");
+					return INTERPRET_RUNTIME_ERROR;
+				}
+				push(NUMBER_VAL(-AS_NUMBER(pop())));
+				break;
+			}
+		
 
 			case OP_RETURN:
 			{

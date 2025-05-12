@@ -3,7 +3,60 @@
 
 # include "common.h"
 
-typedef double Value;
+/* tipi di valori che posso avere nel linguaggio */
+typedef enum 
+{
+	VAL_BOOL,		/* booleani --> vero, false */
+	VAL_NIL,		/* nulla */
+	VAL_NUMBER,  	/* numeri */ 
+}	ValueType;
+
+/* union per salvare in memoria il valore */
+typedef struct 
+{	
+	ValueType	type;		/* tipo del valore */
+	union					/* union per salvare il valore */ 	
+	{	
+		bool	boolean;
+		double	number;
+	}	as;
+}	Value;
+
+/* per verificare se l'oggetto value è di un tipo particolare */
+# define IS_BOOL(value)		((value).type == VAL_BOOL)
+# define IS_NIL(value)		((value).type == VAL_NIL)
+# define IS_NUMBER(value)	((value).type == VAL_NUMBER)
+
+/* macro per prendere il valore da un oggetto Value
+*	
+*	// equivalente 	
+*	bool b = val.as.boolean;
+*/
+# define AS_BOOL(value)		((value).as.boolean)
+# define AS_NUMBER(value)	((value).as.number)
+
+
+/*  designated initializer --> macro per creare un oggetto di tipo value
+*	setta il campo type a VAL_
+*	imposta il valore a value
+*
+*	equivalente a:
+*
+*	Value v;
+*	v.type = VAL_NUMBER;
+*	v.as.number = 3.14;
+*
+*	Value v = {
+*    .type = VAL_NUMBER,
+*    .as = {
+*        .number = 3.14
+*    }
+* };
+*
+*/
+# define BOOL_VAL(value)	((Value) {VAL_BOOL, {.boolean = value}})
+# define NIL_VAL			((Value) {VAL_NIL, {.number = 0}})
+# define NUMBER_VAL(value)	((Value) {VAL_NUMBER, {.number = value}})
 
 typedef struct {
 	int 	capacity;

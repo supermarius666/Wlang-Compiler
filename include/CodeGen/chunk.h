@@ -20,7 +20,10 @@ typedef enum {
 	OP_SUB,			/* sottrazione */
 	OP_MUL,			/* moltiplicazione */
 	OP_DIV,			/* divisione */
-	OP_RETURN,
+	OP_NIL,			/* per valori nulli */
+	OP_TRUE,		/* per valore vero*/
+	OP_FALSE,		/* per valore falso */
+	OP_RETURN,		/* return code */
 }	OpCode;
 
 
