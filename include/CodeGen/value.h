@@ -77,6 +77,8 @@ typedef struct {
  */
 void	initValueArray(ValueArray *array);
 
+/* gestisce == tra i vari tipi di valori */
+bool	valuesEqual(Value a, Value b);
 
 /**
  * @brief Frees the memory allocated for a ValueArray.

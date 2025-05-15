@@ -190,13 +190,13 @@ ParseRule rules []= {
 	[STAR]					=	{NULL, binary, PREC_FACTOR},
 
 	[NON]					= 	{unary, NULL, PREC_NONE},
-	[NOT_EQUAL]				= 	{NULL, NULL, PREC_NONE},
+	[NOT_EQUAL]				= 	{NULL, binary, PREC_EQUAL},
 	[EQUAL]					= 	{NULL, NULL, PREC_NONE},
-	[EQUALEQUAL]			= 	{NULL, NULL, PREC_NONE},
-	[GREATER]				= 	{NULL, NULL, PREC_NONE},
-	[GREATER_EQUAL]			= 	{NULL, NULL, PREC_NONE},
-	[LESS]					= 	{NULL, NULL, PREC_NONE},
-	[LESS_EQUAL]			= 	{NULL, NULL, PREC_NONE},
+	[EQUALEQUAL]			= 	{NULL, binary, PREC_EQUAL},
+	[GREATER]				= 	{NULL, binary, PREC_CMP},
+	[GREATER_EQUAL]			= 	{NULL, binary, PREC_CMP},
+	[LESS]					= 	{NULL, binary, PREC_CMP},
+	[LESS_EQUAL]			= 	{NULL, binary, PREC_CMP},
 	[IDENTIFIER]			= 	{NULL, NULL, PREC_NONE},
 	[STRING]				= 	{NULL, NULL, PREC_NONE},
 	[NUMBER]				=	{number, NULL, PREC_NONE},
@@ -242,6 +242,20 @@ static void	binary()
 		case STAR: emitByte(OP_MUL); break;
 		case SLASH: emitByte(OP_DIV); break;	
 		
+		/* ==
+		* >
+		* <
+		* (a != b) --> !(a == b)
+		* (a <= b) --> !(a > b)
+		* (a >= b) --> !(a < b) 
+		*/
+		case NOT_EQUAL: emitBytes(OP_EQUAL, OP_NOT); break;
+		case EQUALEQUAL: emitByte(OP_EQUAL); break;
+		case GREATER: emitByte(OP_GREATER); break;
+		case GREATER_EQUAL: emitBytes(OP_LESS, OP_NOT); break;
+		case LESS: emitByte(OP_LESS); break;
+		case LESS_EQUAL: emitBytes(OP_GREATER, OP_NOT); break;
+
 		default:
 			return;
 	}

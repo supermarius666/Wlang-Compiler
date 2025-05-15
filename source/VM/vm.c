@@ -134,6 +134,20 @@ static InterpretResult run()
 				/* faccio pop dell'operando, poi lo nego e poi lo ripusho sulla stack */
 				push(BOOL_VAL(isFalsey(pop()))); break;
 			}
+
+			/* comparazione--> cmp */
+			case OP_EQUAL:
+			{
+				Value a = pop();
+				Value b = pop();
+				/* posso usare == su tante coppie di oggetti, per gestire la logica uso la funzione valuesEqual*/
+				push(BOOL_VAL(valuesEqual(a, b)));
+				break;
+			}
+
+			case OP_GREATER: BINARY_OP(BOOL_VAL, >); break;
+			case OP_LESS: BINARY_OP(BOOL_VAL, <); break;
+
 			case OP_RETURN:
 			{
 				printValue(pop());
