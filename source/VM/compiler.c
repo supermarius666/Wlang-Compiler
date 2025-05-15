@@ -161,8 +161,11 @@ static void unary()
 	// bytecode 
 	switch (opType)
 	{
-		/* in futuro potrei aggiungere roba*/
+		/* nagazione numero con meno */
 		case MINUS: emitByte(OP_NEGATE); break;
+
+		/* negazione booleano con non */
+		case NON:	emitByte(OP_NOT); break;
 		
 		default:
 			return;
@@ -186,7 +189,7 @@ ParseRule rules []= {
 	[SLASH]					=	{NULL, binary, PREC_FACTOR},
 	[STAR]					=	{NULL, binary, PREC_FACTOR},
 
-	[NON]					= 	{NULL, NULL, PREC_NONE},
+	[NON]					= 	{unary, NULL, PREC_NONE},
 	[NOT_EQUAL]				= 	{NULL, NULL, PREC_NONE},
 	[EQUAL]					= 	{NULL, NULL, PREC_NONE},
 	[EQUALEQUAL]			= 	{NULL, NULL, PREC_NONE},
@@ -210,6 +213,7 @@ ParseRule rules []= {
 
 	[ERROR]					=	{NULL, NULL, PREC_NONE},
 	[EOF_TOKEN]				=	{NULL, NULL, PREC_NONE},
+	[END_STM]				=	{NULL, NULL, PREC_NONE},
 	[MENTRE]				=	{NULL, NULL, PREC_NONE},
 	[RETURN]				=	{NULL, NULL, PREC_NONE},
 	[NULLA]					=	{literal, NULL, PREC_NONE},

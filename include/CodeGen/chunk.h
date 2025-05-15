@@ -16,6 +16,7 @@
 typedef enum {
 	OP_CONSTANT,	/* for constant instructions like print (stampa)  --> takes a single byte operand that specifies which constant to load from the chunk's constant array*/
 	OP_NEGATE,		/* negazione di un numero --> operatore unario */
+	OP_NOT,			/* il not logico, per invertire roba booleana */
 	OP_ADD,			/* somma */
 	OP_SUB,			/* sottrazione */
 	OP_MUL,			/* moltiplicazione */

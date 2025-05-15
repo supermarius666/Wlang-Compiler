@@ -20,6 +20,12 @@ static Value	peek(int distance)
 	return vm.stackTop[-1 - distance ];
 }
 
+/* questa funzione verifica se una variabile è nulla o è booleana falsa --> allora è falsey; tutto il resto è true(vero)*/
+static bool isFalsey(Value value)
+{
+	return( (IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value))));
+}
+
 /* funzione che stampa l'errore e ferma il compilatore */
 static void runtimeError(const char *format, ...)
 {
@@ -123,6 +129,11 @@ static InterpretResult run()
 			case OP_TRUE: push(BOOL_VAL(true)); break;
 			case OP_FALSE: push(BOOL_VAL(false)); break;
 
+			case OP_NOT:
+			{
+				/* faccio pop dell'operando, poi lo nego e poi lo ripusho sulla stack */
+				push(BOOL_VAL(isFalsey(pop()))); break;
+			}
 			case OP_RETURN:
 			{
 				printValue(pop());

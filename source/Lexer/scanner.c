@@ -154,7 +154,7 @@ static TokenType identifierType()
 				switch (scanner.start[1])
 				{
 				case 'a':
-					return (checkKeyword(2, 3,  "lso",  VERO));
+					return (checkKeyword(2, 3,  "lso",  FALSO));
 				
 				case 'u':
 					return (checkKeyword(2, 1,  "n",  FUN));
