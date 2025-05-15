@@ -55,6 +55,7 @@ void	printValue(Value value)
 		}
 		case VAL_NIL: printf("nulla"); break; 
 		case VAL_NUMBER: printf("%g", AS_NUMBER(value)); break;  /* uso %g perché sceglie in automatico se servono le cifre decimali o meno */
+		case VAL_OBJ: printObject(value); break;  
 		default:
 			break;
 	}

@@ -2,6 +2,7 @@
 #include "../../include/VM/compiler.h"
 #include "../../include/Lexer/scanner.h"
 #include "../../include/Parser/parser.h"
+#include "../../include/CodeGen/object.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -143,6 +144,15 @@ static void	number()
 	emitCostant(NUMBER_VAL(value));
 }
 
+/* */
+static void	string()
+{
+	/*	prende la stringa direttamente dal lexema. Il +1 e -2 servono a togliere gli apici
+		dopo viene creato un oggetto string, messo in value e poi messo nella lista delle costanti 
+	*/
+	emitCostant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.lenght - 2)));
+}
+
 /* grouping --> cose tra parentesi;  prefix expression --> significa che ha un token particolare con il quale inizia */
 static void	grouping()
 {
@@ -198,7 +208,7 @@ ParseRule rules []= {
 	[LESS]					= 	{NULL, binary, PREC_CMP},
 	[LESS_EQUAL]			= 	{NULL, binary, PREC_CMP},
 	[IDENTIFIER]			= 	{NULL, NULL, PREC_NONE},
-	[STRING]				= 	{NULL, NULL, PREC_NONE},
+	[STRING]				= 	{string, NULL, PREC_NONE},
 	[NUMBER]				=	{number, NULL, PREC_NONE},
 
 	[E]						=	{NULL, NULL, PREC_NONE},

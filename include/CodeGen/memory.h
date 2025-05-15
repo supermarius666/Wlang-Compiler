@@ -3,6 +3,10 @@
 
 # include "common.h"
 
+/* questa macro alloca memoria */
+# define ALLOCATE(type, count)	\
+	(type *)reallocate(NULL, 0, sizeof(type) * (count))
+
 /**
  * 	GROW_CAPACITY(capacity):
  * 	 Calculates the new capacity for a dynamically
@@ -34,7 +38,6 @@
  */
 # define FREE_ARRAY(type, pointer, oldCount) \
 	reallocate(pointer, sizeof(type) * oldCount, 0)
-
 
 /**
  * @brief Reallocates a block of memory to a new size.

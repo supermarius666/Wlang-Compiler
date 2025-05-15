@@ -3,12 +3,19 @@
 
 # include "common.h"
 
+/* forward declaration --> dichiaro la struct Obj, come se fosse una classe */
+typedef struct Obj	Obj;
+/* forward declaration della struct che rappresenta l'oggetto di tipo stringa --> deriva da Obj */
+typedef struct ObjString ObjString;
+
 /* tipi di valori che posso avere nel linguaggio */
 typedef enum 
 {
 	VAL_BOOL,		/* booleani --> vero, false */
 	VAL_NIL,		/* nulla */
-	VAL_NUMBER,  	/* numeri */ 
+	VAL_NUMBER,  	/* numeri */
+	VAL_OBJ,		/* questo è un tipo di valore particolare che server per rappresentare 
+					   cose cose allocate in heap, cose grandi che possono variare, come le stringhe, funzioni, ...*/ 
 }	ValueType;
 
 /* union per salvare in memoria il valore */
@@ -19,6 +26,7 @@ typedef struct
 	{	
 		bool	boolean;
 		double	number;
+		Obj 	*obj;
 	}	as;
 }	Value;
 
@@ -26,6 +34,7 @@ typedef struct
 # define IS_BOOL(value)		((value).type == VAL_BOOL)
 # define IS_NIL(value)		((value).type == VAL_NIL)
 # define IS_NUMBER(value)	((value).type == VAL_NUMBER)
+# define IS_OBJ(value)		((value).type == VAL_OBJ)
 
 /* macro per prendere il valore da un oggetto Value
 *	
@@ -34,6 +43,7 @@ typedef struct
 */
 # define AS_BOOL(value)		((value).as.boolean)
 # define AS_NUMBER(value)	((value).as.number)
+# define AS_OBJ(value)  	((value).as.obj)
 
 
 /*  designated initializer --> macro per creare un oggetto di tipo value
@@ -57,6 +67,7 @@ typedef struct
 # define BOOL_VAL(value)	((Value) {VAL_BOOL, {.boolean = value}})
 # define NIL_VAL			((Value) {VAL_NIL, {.number = 0}})
 # define NUMBER_VAL(value)	((Value) {VAL_NUMBER, {.number = value}})
+# define OBJ_VAL(object)	((Value) {VAL_OBJ, {.obj = (Obj *)object}})
 
 typedef struct {
 	int 	capacity;
@@ -105,4 +116,5 @@ void	writeValueArray(ValueArray *array, Value value);
 
 void	printValue(Value value);
 
+# include "object.h"
 #endif
