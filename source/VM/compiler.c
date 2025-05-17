@@ -83,6 +83,21 @@ static void	consume(TokenType type, const char *message)
 	errorAtCurrent(message);
 }
 
+/* ritorna true se il token è del tipo giusto */
+static bool check(TokenType type)
+{
+	return (parser.current.type == type);
+}
+
+/* funzione che verifica se il token che mi aspetto è quello giusto */
+static bool match(TokenType type)
+{
+	if (!check(type)) return (false);
+	advance();
+	return (true);
+}
+
+
 /* agginge un byte al chunk di byte */
 static void	emitByte(uint8_t byte)
 {
@@ -99,6 +114,27 @@ static void emitReturn()
 static void	expression()
 {
 	parsePrecedence(PREC_ASSIGNMENT);
+}
+
+static void printStatement()
+{
+	expression();
+	consume(END_STM, "Expected '!!' after value." );
+	emitByte(OP_PRINT);
+}
+
+
+/* funzione per fare parsing degli stmt */
+static void statement()
+{
+	if (match(STAMPA))
+		printStatement();
+}
+
+/* funzione che si occupa degli stmt di dichiarazione */
+static void declaration()
+{
+	statement();
 }
 
 /* mi da l'indice della costante nella lista di costanti associate al chunk */
@@ -317,8 +353,10 @@ bool	compile(const char *source, Chunk *chunk)
 	parser.panicMode = false;
 
 	advance();
-	expression();
-	consume(EOF_TOKEN, "Expected end of expression");
+	
+	while (!match(EOF_TOKEN))
+		declaration();
+
 	endCompiler();
 	return (!parser.hadError);
 }

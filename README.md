@@ -41,7 +41,7 @@ ValueArray --> array per contenere tutte le costanti di un chunk di istruzioni
 disassembler --> serve per il debug
 
 ### TODO
-- [ ] assolutamente aggiungere un garbage collector. per ora lo posso saltare, ma va aggiunto (page: 343)
+- [ ] assolutamente aggiungere un garbage collector. per ora lo posso saltare, ma va aggiunto (page: 349)
 Attualmente ho una lista di references di oggetti allocati in modo dimanico nella VM. Ogni oggetto ha un puntatore al next.
 
 page: 340 

@@ -30,6 +30,7 @@ typedef enum {
 	OP_NIL,			/* per valori nulli */
 	OP_TRUE,		/* per valore vero*/
 	OP_FALSE,		/* per valore falso */
+	OP_PRINT,		/* per stampa */
 	OP_RETURN,		/* return code */
 }	OpCode;
 

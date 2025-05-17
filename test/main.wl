@@ -1,1 +1,1 @@
-"Hello " + "World!"
+stampa ("Hello " + "World!")!!

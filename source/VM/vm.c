@@ -185,10 +185,16 @@ static InterpretResult run()
 			case OP_GREATER: BINARY_OP(BOOL_VAL, >); break;
 			case OP_LESS: BINARY_OP(BOOL_VAL, <); break;
 
-			case OP_RETURN:
+			/* per stampare */
+			case OP_PRINT:
 			{
 				printValue(pop());
 				printf("\n");
+				break;
+			}
+
+			case OP_RETURN:
+			{
 				return INTERPRET_OK;
 			}
 

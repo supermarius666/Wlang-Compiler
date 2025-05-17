@@ -175,7 +175,7 @@ static TokenType identifierType()
 					return (checkKeyword(2, 0,  "",  SE));
 				
 				case 't':
-					return (checkKeyword(1, 4,  "ampa",  STAMPA));				
+					return (checkKeyword(2, 4,  "ampa",  STAMPA));				
 				}	
 			}	
 		}
