@@ -7,6 +7,10 @@
 # define ALLOCATE(type, count)	\
 	(type *)reallocate(NULL, 0, sizeof(type) * (count))
 
+
+/* questa macro che mette la memoria a zero */
+ # define FREE(type, pointer) reallocate(pointer, sizeof(type), 0)
+
 /**
  * 	GROW_CAPACITY(capacity):
  * 	 Calculates the new capacity for a dynamically
@@ -56,5 +60,7 @@
  */
 void	*reallocate(void *pointer, size_t oldSize, size_t newSize);
 
+/* funzione che libera tutti gli oggetti allocati dinamicamente quando finisco l'esecuzione della VM*/
+void	freeObjects();
 
 #endif

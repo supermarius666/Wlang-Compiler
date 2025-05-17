@@ -12,7 +12,10 @@ typedef struct {
 	uint8_t	*ip;				/* instruction pointer (ip) --> punta alla prossima istruzione da eseguire */
 	Value	stack[STACK_MAX];	/* la stack della Vm*/
 	Value	*stackTop;			/* stack pointer --> punta dove dovrebbe essere inserito il prossimo elemento */
+	Obj		*objects;			/* lista di oggetti allocati in modo dinamico */
 }	Vm;
+
+extern Vm vm;
 
 /* esito dell'interpretazione codice quando lo eseguo! */
 typedef enum {

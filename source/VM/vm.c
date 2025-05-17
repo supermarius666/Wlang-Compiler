@@ -64,11 +64,12 @@ static void runtimeError(const char *format, ...)
 void	initVm()
 {
 	resetStack();
+	vm.objects = NULL;
 }
 
 void	freeVm()
 {
-
+	freeObjects();
 }
 
 /*

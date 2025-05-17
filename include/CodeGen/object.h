@@ -26,7 +26,8 @@ typedef enum
 /* struct oggetto */
 struct Obj
 {
-	ObjType	type;	/* tipo di oggetto: stringa, funzione, ... */
+	ObjType		type;	/* tipo di oggetto: stringa, funzione, ... */
+	struct Obj	*next;	/* puntatore al prossimo nodo nella lista di oggetti --> da cambiare in futuro */
 };
 
 /* struct oggetto stringa */
