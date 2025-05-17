@@ -37,6 +37,9 @@ struct ObjString
 	char	*chars;		/* contenuto stringa */
 };	
 
+/* funzione che alloca e restituisce una stringa */
+ObjString	*takeString(char *chars, int lenght);
+
 /* funzione che fa copy dei caratteri della stringa come lexema in un array di chars*/
 ObjString	*copyString(const char *chars, int lenght);
 
