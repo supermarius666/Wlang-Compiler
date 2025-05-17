@@ -1,1 +1,1 @@
-"hello world"
+"ciao" == "hello"

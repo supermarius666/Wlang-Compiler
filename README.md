@@ -39,3 +39,6 @@ Chunk --> array di byte che rappresentano istruzioni (o dati)
 Value --> tipo di dato che rappresenta i double
 ValueArray --> array per contenere tutte le costanti di un chunk di istruzioni
 disassembler --> serve per il debug
+
+
+page: 340 
