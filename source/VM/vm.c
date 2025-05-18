@@ -238,6 +238,26 @@ static InterpretResult run()
 				break;
 			}
 
+			case OP_SET_GLOBAL:
+			{
+				ObjString* name = READ_STRING();
+				bool found = false;
+				for (int i = 0; i < globalCount; i++) {
+					if (strcmp(globals[i].name->chars, name->chars) == 0) {
+						globals[i].value = peek(0);  
+						found = true;
+						break;
+					}
+				}
+
+				if (!found) {
+					runtimeError("Undefined variable '%s'.", name->chars);
+					return INTERPRET_RUNTIME_ERROR;
+				}
+
+				break;
+			}
+
 			case OP_RETURN:
 			{
 				return INTERPRET_OK;

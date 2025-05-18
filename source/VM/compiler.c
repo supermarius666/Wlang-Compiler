@@ -20,8 +20,9 @@ Chunk	*compilingChunk;
 /* forward declaration */
 static void	parsePrecedence(Precedence precedence);
 static void expression();
-static void	binary();
-static void	literal();
+static void	binary(bool canAssign);
+static void	literal(bool canAssign);
+static bool match(TokenType type);
 static void defineVariable(uint8_t global);
 static uint8_t makeCostant(Value value);
 
@@ -275,14 +276,14 @@ static void	endCompiler()
 }
 
 /* prende il lexema del literale number */
-static void	number()
+static void	number(bool canAssign)
 {
 	double value = strtod(parser.previous.start, NULL);
 	emitCostant(NUMBER_VAL(value));
 }
 
 /* */
-static void	string()
+static void	string(bool canAssign)
 {
 	/*	prende la stringa direttamente dal lexema. Il +1 e -2 servono a togliere gli apici
 		dopo viene creato un oggetto string, messo in value e poi messo nella lista delle costanti 
@@ -291,14 +292,14 @@ static void	string()
 }
 
 /* grouping --> cose tra parentesi;  prefix expression --> significa che ha un token particolare con il quale inizia */
-static void	grouping()
+static void	grouping(bool canAssign)
 {
 	expression();
 	consume(RIGHT_PAREN, "Expected ')' after expression.");
 }
 
 /* negazione --> prefix expression */
-static void unary()
+static void unary(bool canAssign)
 {
 	TokenType opType = parser.previous.type;
 
@@ -322,16 +323,23 @@ static void unary()
 /*	questa funzione prende il nome della variabile, poi trova l'indice nella lista della costanti
 *	e poi genera il bytecode per per caricare la variabile globale
 */
-static void nameVariable(Token name)
+static void nameVariable(Token name, bool canAssign)
 {
 	uint8_t arg = identifierConstant(&name);
-	emitBytes(OP_GET_GLOBAL, arg);
+	
+	if (canAssign &&  match(EQUAL))
+	{
+		expression();
+		emitBytes(OP_SET_GLOBAL, arg);
+	}
+	else
+		emitBytes(OP_GET_GLOBAL, arg);
 }
 
 /* questo è per accedere alla variabile tramite il nome */
-static void variable()
+static void variable(bool canAssign)
 {
-	nameVariable(parser.previous);
+	nameVariable(parser.previous, canAssign);
 }
 
 /* questa è la tabella dei puntatori a funzione per ogni tipo di espressione */
@@ -388,7 +396,7 @@ static ParseRule	*getRule(TokenType type)
 }
 
 /* espressioni binari --> espressione infix --> operatore in mezzo */
-static void	binary()
+static void	binary(bool canAssign)
 {
 	TokenType opType = parser.previous.type;
 
@@ -425,7 +433,7 @@ static void	binary()
 }
 
 /* funzione per i literals */
-static void	literal()
+static void	literal(bool canAssign)
 {
 	switch (parser.previous.type)
 	{
@@ -447,14 +455,18 @@ static void	parsePrecedence(Precedence precedence)
 		error("Expect expression.");
 		return;
 	}
-	prefixRule();
+	bool canAssign = precedence <= PREC_ASSIGNMENT;
+	prefixRule(canAssign);
 
 	while (precedence <= getRule(parser.current.type)->precedance)
 	{
 		advance();
 		ParseFn infixRule = getRule(parser.previous.type)->infix;
-		infixRule();
+		infixRule(canAssign);
 	}
+
+	if (canAssign && match(EQUAL))
+		error("Invalid assignment target.");
 }
 
 bool	compile(const char *source, Chunk *chunk)

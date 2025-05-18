@@ -32,7 +32,7 @@ typedef enum
 }	Precedence;
 
 /* puntatore a funzione */
-typedef void (*ParseFn)();
+typedef void (*ParseFn)(bool canAssign);
 
 /* parsing rules */
 typedef struct 

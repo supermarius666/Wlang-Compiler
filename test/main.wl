@@ -1,3 +1,3 @@
-sia a = "Hello " !!
-sia b = "World!" !!
-stampa(a + b)!!
+sia a!!
+a = 3!!
+stampa(a)!!
