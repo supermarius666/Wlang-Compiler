@@ -53,4 +53,23 @@ static inline bool isObjType(Value value, ObjType type)
 	return (IS_OBJ(value) && AS_OBJ(value)->type == type);
 }
 
+
+
+/********************DA METTERE IL GB**************************/
+
+# define MAX_GLOBALS 256
+
+typedef struct {
+    ObjString* name;
+    Value value;
+} Global;
+
+extern Global globals[MAX_GLOBALS];
+extern int globalCount;
+
+
+/**************************************************************/
+
+
+
 #endif

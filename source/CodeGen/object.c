@@ -8,6 +8,10 @@
 #include <string.h>
 
 
+
+Global globals[MAX_GLOBALS];
+int globalCount = 0;
+
 /* per evitare di fare il cast da void * a ObjString*/
 #define ALLOCATE_OBJ(type, objectType) \
     ((type *)allocateObject(sizeof(type), objectType))

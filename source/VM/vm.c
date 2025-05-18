@@ -93,6 +93,7 @@ static InterpretResult run()
 {
 # define READ_BYTE() (*(vm.ip++))	// faccio questa def qua perché serve solo qua, infatti, alla fine della funzione faccio undef
 # define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
+# define READ_STRING()	AS_STRING(READ_CONSTANT())
 /* macro per calcolare le espressioni aritmetiche */
 # define BINARY_OP(valueType, op) \
 	do { \
@@ -185,11 +186,55 @@ static InterpretResult run()
 			case OP_GREATER: BINARY_OP(BOOL_VAL, >); break;
 			case OP_LESS: BINARY_OP(BOOL_VAL, <); break;
 
+			case OP_POP: pop(); break;
+
 			/* per stampare */
 			case OP_PRINT:
 			{
 				printValue(pop());
 				printf("\n");
+				break;
+			}
+
+			/* DA RIVEDERE CON IL GB */
+			case OP_DEFINE_GLOBAL:
+			{
+				ObjString* name = READ_STRING();
+
+				Value value = peek(0); // Il valore da assegnare
+
+				// Aggiunge la variabile globale
+				if (globalCount >= MAX_GLOBALS) {
+					runtimeError("Too many global variables.");
+					return INTERPRET_RUNTIME_ERROR;
+				}
+
+				globals[globalCount].name = name;
+				globals[globalCount].value = value;
+				globalCount++;
+				
+				pop(); // Rimuove il valore dallo stack
+				break;
+			}
+
+			/* DA RIVEDERE CON IL GB */
+			case OP_GET_GLOBAL:
+			{
+				ObjString* name = READ_STRING();
+				bool found = false;
+				for (int i = 0; i < globalCount; i++) {
+					if (strcmp(globals[i].name->chars, name->chars) == 0) {
+						push(globals[i].value);
+						found = true;
+						break;
+					}
+				}
+
+				if (!found) {
+					runtimeError("Undefined variable '%s'.", name->chars);
+					return INTERPRET_RUNTIME_ERROR;
+				}
+
 				break;
 			}
 
@@ -203,6 +248,7 @@ static InterpretResult run()
 		}
 	}
 # undef BINARY_OP
+# undef READ_STRING
 # undef READ_CONSTANT
 # undef READ_BYTE
 }

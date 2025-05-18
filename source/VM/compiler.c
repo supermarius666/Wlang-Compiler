@@ -22,7 +22,8 @@ static void	parsePrecedence(Precedence precedence);
 static void expression();
 static void	binary();
 static void	literal();
-
+static void defineVariable(uint8_t global);
+static uint8_t makeCostant(Value value);
 
 /* ritorna il chunk attuale */
 static Chunk	*currentChunk()
@@ -118,23 +119,114 @@ static void	expression()
 
 static void printStatement()
 {
-	expression();
-	consume(END_STM, "Expected '!!' after value." );
-	emitByte(OP_PRINT);
+	consume(LEFT_PAREN, "Expected '(' after 'stampa'.");
+    expression();
+
+	if (match(END_STM)) 
+	{
+		/* da vedere --> questo controllo nasce da una roba che è capitata mentre testavo il codice */
+        errorAtCurrent("Unexpected '!!' before closing ')'. Did you mean: stampa(expr)!! ?");
+        return;
+    }
+
+    consume(RIGHT_PAREN, "Expected ')' after expression.");
+    consume(END_STM, "Expected '!!' after expression.");
+    emitByte(OP_PRINT);
 }
 
+/*	funzione per sincronizzare il parser quando va in panicMode 
+*	salto i token finche non trovo un punto che denota la fine di un stmt e
+*	quindi posso sincronizzare il parser
+*/
+static void synchronize()
+{
+	parser.panicMode = false;
+
+	while (parser.current.type != EOF_TOKEN)
+	{
+		if (parser.previous.type == END_STM) return;
+
+		switch (parser.current.type)
+		{
+			/* potrei aggiungere class per le classi */
+			case SE:
+			case SIA:	/* dichiarazione variabili */
+			case STAMPA:
+			case MENTRE:
+			case FUN:
+			case RETURN:
+				return;
+		
+		default:
+		/* non deve fare nulla qua */
+			;
+		}
+
+		advance();
+	}
+}
+
+/* funzione per il parsing degli expression stmt --> espressione seguita da !! */
+static void expressionStatement()
+{
+	expression();
+	consume(END_STM, "Expected '!!' after expression.");
+	emitByte(OP_POP);
+}
+
+
+
+/*	prende il token identifier e aggiunge il suo lexema, cioè il nome della variabile
+*	nella lista delle costanti
+*/
+static uint8_t	identifierConstant(Token *name)
+{
+	return (makeCostant(OBJ_VAL(copyString(name->start, name->lenght))));
+}
+
+/* funzione per il parsing della variabile */
+static uint8_t parseVariable(const char *errorMessage)
+{
+	consume(IDENTIFIER, errorMessage);
+	return (identifierConstant(&parser.previous));
+}
+
+/* funzione per la dichiarazione di variabili */
+static void varDeclaration()
+{
+	uint8_t	global = parseVariable("Expected variable name.");
+
+	/* se c'è l'uguale prendo l'espressione */
+	if (match(EQUAL))
+		expression();
+	/* altrimenti la variabile va messa a 'nulla' */
+	else
+		emitByte(OP_NIL);
+	
+	consume(END_STM, "Expected '!!' after expression.");
+	
+	/* definisco la variabile globale */
+	defineVariable(global);
+}
 
 /* funzione per fare parsing degli stmt */
 static void statement()
 {
 	if (match(STAMPA))
 		printStatement();
+	else
+		expressionStatement();
 }
 
 /* funzione che si occupa degli stmt di dichiarazione */
 static void declaration()
 {
-	statement();
+	if (match(SIA))
+		varDeclaration();	/* per dichiarazioni di variabile con 'sia' */
+	else
+		statement();
+
+	if (parser.panicMode) synchronize();
 }
 
 /* mi da l'indice della costante nella lista di costanti associate al chunk */
@@ -162,6 +254,15 @@ static void	emitBytes(uint8_t byte1, uint8_t byte2)
 static void	emitCostant(Value value)
 {
 	emitBytes(OP_CONSTANT, makeCostant(value));
+}
+
+/*	questa funzione genera il bytecode per la variabile globale il cui nome è salvato nella
+*	lista delle costanti alla quale posso fare riferimento con l'indice nella lista restituito da
+*	identifierConstant. il valore è salvato anche (global)
+*/
+static void defineVariable(uint8_t global)
+{
+	emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
 /* questo chiude la compilazione con return */
@@ -218,6 +319,21 @@ static void unary()
 	}
 }
 
+/*	questa funzione prende il nome della variabile, poi trova l'indice nella lista della costanti
+*	e poi genera il bytecode per per caricare la variabile globale
+*/
+static void nameVariable(Token name)
+{
+	uint8_t arg = identifierConstant(&name);
+	emitBytes(OP_GET_GLOBAL, arg);
+}
+
+/* questo è per accedere alla variabile tramite il nome */
+static void variable()
+{
+	nameVariable(parser.previous);
+}
+
 /* questa è la tabella dei puntatori a funzione per ogni tipo di espressione */
 ParseRule rules []= {
 	[LEFT_PAREN]			=	{grouping, NULL, PREC_NONE}, 
@@ -243,7 +359,7 @@ ParseRule rules []= {
 	[GREATER_EQUAL]			= 	{NULL, binary, PREC_CMP},
 	[LESS]					= 	{NULL, binary, PREC_CMP},
 	[LESS_EQUAL]			= 	{NULL, binary, PREC_CMP},
-	[IDENTIFIER]			= 	{NULL, NULL, PREC_NONE},
+	[IDENTIFIER]			= 	{variable, NULL, PREC_NONE},
 	[STRING]				= 	{string, NULL, PREC_NONE},
 	[NUMBER]				=	{number, NULL, PREC_NONE},
 

@@ -44,4 +44,6 @@ disassembler --> serve per il debug
 - [ ] assolutamente aggiungere un garbage collector. per ora lo posso saltare, ma va aggiunto (page: 349)
 Attualmente ho una lista di references di oggetti allocati in modo dimanico nella VM. Ogni oggetto ha un puntatore al next.
 
-page: 340 
+- [ ] devo rivedere la creazione di variabili e aggiungere il gb --> page: 381
+
+page: 377
