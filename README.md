@@ -46,4 +46,8 @@ Attualmente ho una lista di references di oggetti allocati in modo dimanico nell
 
 - [ ] devo rivedere la creazione di variabili e aggiungere il gb --> page: 381
 
+funzione di hash: https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+
+per evitare copie inutili delle stringhe: string interning
+
 page: 377

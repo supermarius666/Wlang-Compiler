@@ -8,6 +8,7 @@ add_executable(wlang
     source/CodeGen/debug.c
     source/CodeGen/value.c
     source/CodeGen/object.c
+    source/CodeGen/table.c
     source/VM/vm.c
     source/VM/compiler.c
     source/Lexer/scanner.c

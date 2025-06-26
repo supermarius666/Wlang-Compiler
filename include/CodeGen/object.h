@@ -33,9 +33,10 @@ struct Obj
 /* struct oggetto stringa */
 struct ObjString
 {
-	Obj		obj;		/* l'ogetto associato --> cosi derivo dalla classe padre Obj (OOP IN C)*/
-	int		lenght;		/* lunghezza stringa */
-	char	*chars;		/* contenuto stringa */
+	Obj			obj;		/* l'ogetto associato --> cosi derivo dalla classe padre Obj (OOP IN C)*/
+	int			lenght;		/* lunghezza stringa */
+	char		*chars;		/* contenuto stringa */
+	uint32_t	hash;		/* hash della stringa */
 };	
 
 /* funzione che alloca e restituisce una stringa */

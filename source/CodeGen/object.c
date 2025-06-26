@@ -1,6 +1,7 @@
 #include "../../include/CodeGen/object.h"
 #include "../../include/CodeGen/value.h"
 #include "../../include/CodeGen/memory.h"
+#include "../../include/CodeGen/table.h"
 #include "../../include/VM/vm.h"
 
 
@@ -28,28 +29,60 @@ static Obj *allocateObject(size_t size, ObjType type)
 }
 
 /* crea una nuova stringa e la alloca in heap; vengono inizializzati i suoi campi */
-static ObjString *allocateString(char *chars, int lenght)
+static ObjString *allocateString(char *chars, int lenght, uint32_t hash)
 {
 	ObjString	*string = ALLOCATE_OBJ(ObjString, OBJ_STRING);
 	string->lenght = lenght;
 	string->chars = chars;
+	string->hash = hash;
+
+	tableSet(&vm.strings, string, NIL_VAL);
 
 	return (string);
 }
 
+/* FNV-1a alogithm */
+static uint32_t	hashString(const char *key, int lenght)
+{
+	uint32_t hash = 2166136261u;
+
+	for (int i = 0; i < lenght; i++)
+	{
+		hash ^= key[i];
+		hash *= 16777619;
+	}
+
+	return (hash);
+}
+
+
 ObjString	*takeString(char *chars, int lenght)
 {
-	return (allocateString(chars, lenght));
+	uint32_t hash = hashString(chars, lenght);
+	ObjString *interned = tableFindString(&vm.strings, chars, lenght, hash);
+
+	if (interned != NULL)
+	{
+		FREE_ARRAY(char, chars, lenght + 1);
+		return (interned);
+	}
+
+	return (allocateString(chars, lenght, hash));
 }
 
 
 ObjString	*copyString(const char *chars, int lenght)
 {
-	char	*heapChars = ALLOCATE(char, lenght + 1);
+	uint32_t hash = hashString(chars, lenght);
+	ObjString *interned = tableFindString(&vm.strings, chars, lenght, hash);
+
+	if (interned != NULL) return (interned);
+	
+	char *heapChars = ALLOCATE(char, lenght + 1);
 	memcpy(heapChars, chars, lenght);
 	heapChars[lenght] = '\0';
 
-	return (allocateString(heapChars, lenght));
+	return (allocateString(heapChars, lenght, hash));
 }
 
 void printObject(Value value)

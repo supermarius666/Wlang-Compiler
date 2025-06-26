@@ -2,6 +2,7 @@
 # define WLANG_VM_H
 
 # include "../CodeGen/chunk.h"
+# include "../CodeGen/table.h"
 
 /* numero massimo di elementi nella stack */
 # define STACK_MAX 256
@@ -12,6 +13,7 @@ typedef struct {
 	uint8_t	*ip;				/* instruction pointer (ip) --> punta alla prossima istruzione da eseguire */
 	Value	stack[STACK_MAX];	/* la stack della Vm*/
 	Value	*stackTop;			/* stack pointer --> punta dove dovrebbe essere inserito il prossimo elemento */
+	Table	strings;			/* hash table per tenere conto delle stringhe */
 	Obj		*objects;			/* lista di oggetti allocati in modo dinamico */
 }	Vm;
 
