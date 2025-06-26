@@ -14,6 +14,7 @@ typedef struct {
 	Value	stack[STACK_MAX];	/* la stack della Vm*/
 	Value	*stackTop;			/* stack pointer --> punta dove dovrebbe essere inserito il prossimo elemento */
 	Table	strings;			/* hash table per tenere conto delle stringhe */
+	Table	globals;			/* hash table per le variabili globali */
 	Obj		*objects;			/* lista di oggetti allocati in modo dinamico */
 }	Vm;
 

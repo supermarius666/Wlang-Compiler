@@ -29,6 +29,7 @@ static Entry *findEntry(Entry *entries, int capacity, ObjString *key)
 {
 	uint32_t index = key->hash % capacity;
 	Entry *tombstone = NULL;
+
 	for (;;)
 	{
 		Entry *entry = &entries[index];
@@ -36,11 +37,17 @@ static Entry *findEntry(Entry *entries, int capacity, ObjString *key)
 		if (entry->key == NULL)
 		{
 			if (IS_NIL(entry->value))
+			{
 				return (tombstone != NULL ? tombstone : entry);
+			}
 			else
+			{
 				if (tombstone == NULL) tombstone = entry;
+			}
 		}
-		else if (entry->key == key)
+		else if (entry->key->lenght == key->lenght && 
+					entry->key->hash == key->hash &&
+					memcmp(entry->key->chars, key->chars, key->lenght) == 0)
 			return (entry);	
 		index = (index + 1) % capacity;
 	}

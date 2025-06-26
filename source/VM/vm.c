@@ -65,11 +65,13 @@ void	initVm()
 {
 	resetStack();
 	vm.objects = NULL;
+	initTable(&vm.globals);
 	initTable(&vm.strings);
 }
 
 void	freeVm()
 {
+	freeTable(&vm.globals);
 	freeTable(&vm.strings);
 	freeObjects();
 }
@@ -198,65 +200,45 @@ static InterpretResult run()
 				break;
 			}
 
-			/* DA RIVEDERE CON IL GB */
+			/* definizione variabili */
 			case OP_DEFINE_GLOBAL:
 			{
 				ObjString* name = READ_STRING();
 
-				Value value = peek(0); // Il valore da assegnare
-
-				// Aggiunge la variabile globale
-				if (globalCount >= MAX_GLOBALS) {
-					runtimeError("Too many global variables.");
-					return INTERPRET_RUNTIME_ERROR;
-				}
-
-				globals[globalCount].name = name;
-				globals[globalCount].value = value;
-				globalCount++;
+				// aggiungo la stringa nella hash table
+				tableSet(&vm.globals, name, peek(0));
 				
 				pop(); // Rimuove il valore dallo stack
 				break;
 			}
 
-			/* DA RIVEDERE CON IL GB */
+			/* prendo il valore di una variabile */
 			case OP_GET_GLOBAL:
 			{
 				ObjString* name = READ_STRING();
-				bool found = false;
-				for (int i = 0; i < globalCount; i++) {
-					if (strcmp(globals[i].name->chars, name->chars) == 0) {
-						push(globals[i].value);
-						found = true;
-						break;
-					}
-				}
+				Value value;
 
-				if (!found) {
+				if (!tableGet(&vm.globals, name, &value))
+				{
 					runtimeError("Undefined variable '%s'.", name->chars);
-					return INTERPRET_RUNTIME_ERROR;
+					return (INTERPRET_RUNTIME_ERROR);
 				}
 
+				push(value);
 				break;
 			}
 
 			case OP_SET_GLOBAL:
 			{
 				ObjString* name = READ_STRING();
-				bool found = false;
-				for (int i = 0; i < globalCount; i++) {
-					if (strcmp(globals[i].name->chars, name->chars) == 0) {
-						globals[i].value = peek(0);  
-						found = true;
-						break;
-					}
+				
+				if (tableSet(&vm.globals, name, peek(0)))
+				{
+					tableDelete(&vm.globals, name);
+					runtimeError("Cannot assign to undefined variable '%s'.", name->chars);
+					return (INTERPRET_RUNTIME_ERROR);
 				}
-
-				if (!found) {
-					runtimeError("Undefined variable '%s'.", name->chars);
-					return INTERPRET_RUNTIME_ERROR;
-				}
-
+				
 				break;
 			}
 
