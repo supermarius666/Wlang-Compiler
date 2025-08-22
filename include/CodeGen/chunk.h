@@ -40,7 +40,10 @@ typedef enum {
 	OP_SET_LOCAL,
 
 	OP_PRINT,				/* per stampa */
+	OP_JUMP_IF_FALSE,		/* per il branch false nell'if */
+	OP_JUMP,				/* jump normale */
 	OP_RETURN,				/* return code */
+
 }	OpCode;
 
 

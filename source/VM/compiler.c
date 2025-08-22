@@ -21,6 +21,7 @@ Chunk	*compilingChunk;
 Compiler	*current = NULL;
 
 /* forward declaration */
+static void statement();
 static void	parsePrecedence(Precedence precedence);
 static void expression();
 static void	binary(bool canAssign);
@@ -29,6 +30,9 @@ static bool match(TokenType type);
 static void defineVariable(uint8_t global);
 static uint8_t makeCostant(Value value);
 static void	block();
+static int emitJump(uint8_t instruction);
+static void patchJump(int offset);
+
 
 /* ritorna il chunk attuale */
 static Chunk	*currentChunk()
@@ -200,7 +204,7 @@ static void addLocal(Token name)
 
 	Local *local = &current->locals[current->localCount++];
 	local->name = name;
-	local->depth = current->scopeDepth;
+	local->depth = -1;
 }
 
 /* verifica se ho due nomi uguali di variabile(token) */
@@ -216,7 +220,11 @@ static int resolveLocal(Compiler *compiler, Token *name)
 	{
 		Local *local = &compiler->locals[i];
 		if (identifiersEqual(name, &local->name))
+		{
+			if (local->depth == -1)
+				error("Can't read local variable in its own initializer.");
 			return (i);
+		}
 	}
 
 	return (-1);
@@ -291,12 +299,33 @@ static void endScope()
 	}
 }
 
+/* funzione per gestire l'if */
+static void ifStatement()
+{
+	consume(LEFT_PAREN, "Expected '(' after 'se'.");
+	expression();
+	consume(RIGHT_PAREN, "Expected ')' after condition.");
+
+	int thenJump = emitJump(OP_JUMP_IF_FALSE);
+	emitByte(OP_POP);
+	statement();
+	int elseJump = emitJump(OP_JUMP);
+	patchJump(thenJump);
+	emitByte(OP_POP);
+
+	
+	if (match(ALTRIMENTI)) statement();
+	patchJump(elseJump);
+
+}
 
 /* funzione per fare parsing degli stmt */
 static void statement()
 {
 	if (match(STAMPA))
 		printStatement();
+	else if (match(SE))
+		ifStatement();
 	else if (match(LEFT_BRACE))
 	{
 		beginScope();
@@ -347,6 +376,27 @@ static void	emitBytes(uint8_t byte1, uint8_t byte2)
 	return;
 }
 
+/* funzione che mi fa saltare al branch giusto */
+static int emitJump(uint8_t instruction)
+{
+	emitByte(instruction);
+	emitByte(0xff);   // placeholder perché ancora non so quanto è grande il branch else
+	emitByte(0xff);
+	return (currentChunk()->count - 2);
+}
+/* funzione */
+static void patchJump(int offset)
+{
+	int jump = currentChunk()->count - offset - 2;
+
+	if (jump > UINT16_MAX)
+		error("Too much code to jump. Out of code.");
+	
+		currentChunk()->code[offset] = (jump >> 8) & 0xff;
+		currentChunk()->code[offset + 1] = jump & 0xff;
+
+}
+
 /* mette la l'istruzione costante e il valore costante nel chunk */
 static void	emitCostant(Value value)
 {
@@ -360,13 +410,22 @@ static void initCompiler(Compiler *compiler)
 	current = compiler;
 }
 
+static void markInitialized()
+{
+	current->locals[current->localCount - 1].depth = current->scopeDepth;
+}
+
 /*	questa funzione genera il bytecode per la variabile globale il cui nome è salvato nella
 *	lista delle costanti alla quale posso fare riferimento con l'indice nella lista restituito da
 *	identifierConstant. il valore è salvato anche (global)
 */
 static void defineVariable(uint8_t global)
 {
-	if (current->scopeDepth > 0 ) return;
+	if (current->scopeDepth > 0 )
+	{
+		markInitialized();
+		return;
+	}
 	emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
