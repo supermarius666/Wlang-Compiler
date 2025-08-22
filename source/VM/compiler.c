@@ -251,6 +251,28 @@ static void declareVariable()
 	addLocal(*name);
 }
 
+static void and_(bool canAssign)
+{
+	int endJump = emitJump(OP_JUMP_IF_FALSE);
+
+	emitByte(OP_POP);
+	parsePrecedence(PREC_AND);
+
+	patchJump(endJump);
+}
+
+static void or_(bool canAssign)
+{
+	int elseJump = emitJump(OP_JUMP_IF_FALSE);
+	int endJump = emitJump(OP_JUMP);
+
+	patchJump(elseJump);
+	emitByte(OP_POP);
+
+	parsePrecedence(PREC_OR);
+	patchJump(endJump);
+}
+
 /* funzione per il parsing della variabile */
 static uint8_t parseVariable(const char *errorMessage)
 {
@@ -384,7 +406,7 @@ static int emitJump(uint8_t instruction)
 	emitByte(0xff);
 	return (currentChunk()->count - 2);
 }
-/* funzione */
+/* funzione che mi fa saltare all'offset giusto in base alla condizione */
 static void patchJump(int offset)
 {
 	int jump = currentChunk()->count - offset - 2;
@@ -546,13 +568,13 @@ ParseRule rules []= {
 	[STRING]				= 	{string, NULL, PREC_NONE},
 	[NUMBER]				=	{number, NULL, PREC_NONE},
 
-	[E]						=	{NULL, NULL, PREC_NONE},
+	[E]						=	{NULL, and_, PREC_AND},
 	[ALTRIMENTI]			=	{NULL, NULL, PREC_NONE},
 	[SE]					=	{NULL, NULL, PREC_NONE},
 	[VERO]					=	{literal, NULL, PREC_NONE},
 	[FALSO]					=	{literal, NULL, PREC_NONE},
 	[STAMPA]				=	{NULL, NULL, PREC_NONE},
-	[O]						=	{NULL, NULL, PREC_NONE},
+	[O]						=	{NULL, or_, PREC_OR},
 	[SE]					=	{NULL, NULL, PREC_NONE},
 	[FUN]					=	{NULL, NULL, PREC_NONE},
 

@@ -180,8 +180,8 @@ static TokenType identifierType()
 			}	
 		}
 		case 'a': return (checkKeyword(1, 9,  "ltrimenti",  ALTRIMENTI));
-		case 'e': return (checkKeyword(1, 1,  "e",  E));
-		case 'o': return (checkKeyword(1, 1,  "o",  O));
+		case 'e': return (checkKeyword(1, 0,  "",  E));
+		case 'o': return (checkKeyword(1, 0,  "",  O));
 		case 'r': return (checkKeyword(1, 6,  "itorna",  RETURN));
 		case 'n': 
 		{
