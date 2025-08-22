@@ -32,6 +32,7 @@ static uint8_t makeCostant(Value value);
 static void	block();
 static int emitJump(uint8_t instruction);
 static void patchJump(int offset);
+static void emitLoop(int loopStart);
 
 
 /* ritorna il chunk attuale */
@@ -341,6 +342,25 @@ static void ifStatement()
 
 }
 
+static void whileStatement()
+{
+	int loopStart = currentChunk()->count;
+
+	consume(LEFT_PAREN, "Expected '(' after 'mentre'.");
+	expression();
+	consume(RIGHT_PAREN, "Expected ')' after condition.");
+
+	int exitJump = emitJump(OP_JUMP_IF_FALSE);
+	emitByte(OP_POP);
+	statement();
+
+	emitLoop(loopStart);
+
+	patchJump(exitJump);
+	emitByte(OP_POP);
+
+}
+
 /* funzione per fare parsing degli stmt */
 static void statement()
 {
@@ -348,6 +368,8 @@ static void statement()
 		printStatement();
 	else if (match(SE))
 		ifStatement();
+	else if (match(MENTRE))
+		whileStatement();
 	else if (match(LEFT_BRACE))
 	{
 		beginScope();
@@ -406,6 +428,18 @@ static int emitJump(uint8_t instruction)
 	emitByte(0xff);
 	return (currentChunk()->count - 2);
 }
+
+/* funzione che genera il loop */
+static void emitLoop(int loopStart)
+{
+	emitByte(OP_LOOP);
+	int offset = currentChunk()->count - loopStart + 2;
+	if (offset > UINT16_MAX) error("Loop body too large.");
+
+	emitByte((offset >> 8) & 0xff);
+	emitByte(offset & 0xff);
+}
+
 /* funzione che mi fa saltare all'offset giusto in base alla condizione */
 static void patchJump(int offset)
 {

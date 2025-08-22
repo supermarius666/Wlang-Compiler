@@ -42,6 +42,7 @@ typedef enum {
 	OP_PRINT,				/* per stampa */
 	OP_JUMP_IF_FALSE,		/* per il branch false nell'if */
 	OP_JUMP,				/* jump normale */
+	OP_LOOP,				/* per i loop*/
 	OP_RETURN,				/* return code */
 
 }	OpCode;
