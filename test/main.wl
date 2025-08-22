@@ -1,3 +1,6 @@
-sia nome!!
-nome = "Lorenzo"!!
-stampa("Ciao" + " " + nome)!!
+sia a = 3!!
+stampa(a)!!
+{
+	sia a = 5!!
+	stampa(a)!!
+}

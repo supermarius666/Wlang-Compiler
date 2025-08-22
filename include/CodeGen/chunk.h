@@ -36,6 +36,8 @@ typedef enum {
 	OP_DEFINE_GLOBAL,		/* per le variabili globali */
 	OP_GET_GLOBAL,			/* per caricare una variabile globale */
 	OP_SET_GLOBAL,			/* per assegnare una variabile globale */
+	OP_GET_LOCAL,			/* Variabili locali */
+	OP_SET_LOCAL,
 
 	OP_PRINT,				/* per stampa */
 	OP_RETURN,				/* return code */

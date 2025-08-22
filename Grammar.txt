@@ -5,12 +5,17 @@ expression	->	literal
 			|	binary
 			|	grouping	;
 
-literal		->	NUMBER | STRING | "true" | "false"	;
+literal		->	NUMBER | STRING | "vero" | "falso"	;
 grouping	->	"(" expression ")"	;
 unary		->	( "-" | "!" ) expression	;
 binary		->	expression	operator	expression	;
 operator	->	"==" | "!="	| "<" | "<=" | ">" | ">=" |
 				"+"  |  "-" | "*" | "/"	;
+
+statement	->		exprStmt
+				|	printStm	
+				|	block ;
+block		->	"{" declaration* "}" ;
 
 
 lowercase 	--> for production rules (non terminals)

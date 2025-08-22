@@ -17,6 +17,9 @@ Parser	parser;
 /* chunk attuale che sto compilando */
 Chunk	*compilingChunk;
 
+/* compilatore attuale */
+Compiler	*current = NULL;
+
 /* forward declaration */
 static void	parsePrecedence(Precedence precedence);
 static void expression();
@@ -25,6 +28,7 @@ static void	literal(bool canAssign);
 static bool match(TokenType type);
 static void defineVariable(uint8_t global);
 static uint8_t makeCostant(Value value);
+static void	block();
 
 /* ritorna il chunk attuale */
 static Chunk	*currentChunk()
@@ -185,10 +189,68 @@ static uint8_t	identifierConstant(Token *name)
 	return (makeCostant(OBJ_VAL(copyString(name->start, name->lenght))));
 }
 
+/* funzione per aggiungere una var local alla stack */
+static void addLocal(Token name)
+{
+	if (current->localCount == UINT8_COUNT)
+	{
+		error("Too many local variables in function.");
+		return;
+	}
+
+	Local *local = &current->locals[current->localCount++];
+	local->name = name;
+	local->depth = current->scopeDepth;
+}
+
+/* verifica se ho due nomi uguali di variabile(token) */
+static bool identifiersEqual(Token *a, Token *b)
+{
+	if (a->lenght != b->lenght) return (false);
+	return (memcmp(a->start, b->start, a->lenght) == 0);
+}
+
+static int resolveLocal(Compiler *compiler, Token *name)
+{
+	for (int i = compiler->localCount - 1; i >= 0; i--)
+	{
+		Local *local = &compiler->locals[i];
+		if (identifiersEqual(name, &local->name))
+			return (i);
+	}
+
+	return (-1);
+}
+
+/* funzione che dichiara le variabili locali */
+static void declareVariable()
+{
+	// se la variabile è globale non serve (depth 0 sono le var globali)
+	if (current->scopeDepth == 0) return;
+
+	Token *name = &parser.previous;
+
+	for (int i  = current->localCount - 1; i >= 0; i--)
+	{
+		Local *local = &current->locals[i];
+		if (local->depth != -1 && local->depth < current->scopeDepth)
+			break;
+		
+		if (identifiersEqual(name, &local->name))
+			error("Already variable with the same name in this scope.");
+	}
+
+	addLocal(*name);
+}
+
 /* funzione per il parsing della variabile */
 static uint8_t parseVariable(const char *errorMessage)
 {
 	consume(IDENTIFIER, errorMessage);
+
+	declareVariable();
+	if (current->scopeDepth > 0) return (0);
+
 	return (identifierConstant(&parser.previous));
 }
 
@@ -210,11 +272,37 @@ static void varDeclaration()
 	defineVariable(global);
 }
 
+
+/* begin Scope function */
+static void beginScope()
+{
+	current->scopeDepth++;
+}
+
+/* end Scope function */
+static void endScope()
+{
+	current->scopeDepth--;
+
+	while (current->localCount > 0 && current->locals[current->localCount -1].depth > current->scopeDepth)
+	{
+		emitByte(OP_POP);
+		current->localCount--;
+	}
+}
+
+
 /* funzione per fare parsing degli stmt */
 static void statement()
 {
 	if (match(STAMPA))
 		printStatement();
+	else if (match(LEFT_BRACE))
+	{
+		beginScope();
+		block();
+		endScope();
+	}
 	else
 		expressionStatement();
 }
@@ -228,6 +316,14 @@ static void declaration()
 		statement();
 
 	if (parser.panicMode) synchronize();
+}
+
+/* block stmt */
+static void	block()
+{
+	while (!check(RIGHT_BRACE) && !check(EOF))
+		declaration();
+	consume(RIGHT_BRACE, "Expected '}' after block.");
 }
 
 /* mi da l'indice della costante nella lista di costanti associate al chunk */
@@ -257,12 +353,20 @@ static void	emitCostant(Value value)
 	emitBytes(OP_CONSTANT, makeCostant(value));
 }
 
+static void initCompiler(Compiler *compiler)
+{
+	compiler->localCount = 0;
+	compiler->scopeDepth = 0;
+	current = compiler;
+}
+
 /*	questa funzione genera il bytecode per la variabile globale il cui nome è salvato nella
 *	lista delle costanti alla quale posso fare riferimento con l'indice nella lista restituito da
 *	identifierConstant. il valore è salvato anche (global)
 */
 static void defineVariable(uint8_t global)
 {
+	if (current->scopeDepth > 0 ) return;
 	emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
@@ -325,15 +429,27 @@ static void unary(bool canAssign)
 */
 static void nameVariable(Token name, bool canAssign)
 {
-	uint8_t arg = identifierConstant(&name);
+	uint8_t getOp, setOp;
+	int arg = resolveLocal(current, &name);
+	
+	if (arg != -1)
+	{
+		getOp = OP_GET_LOCAL;
+		setOp = OP_SET_LOCAL;
+	} 
+	else{
+		arg = identifierConstant(&name);
+		getOp = OP_GET_GLOBAL;
+		setOp = OP_SET_GLOBAL;
+	}
 	
 	if (canAssign &&  match(EQUAL))
 	{
 		expression();
-		emitBytes(OP_SET_GLOBAL, arg);
+		emitBytes(setOp, (uint8_t)arg);
 	}
 	else
-		emitBytes(OP_GET_GLOBAL, arg);
+		emitBytes(getOp, (uint8_t)arg);
 }
 
 /* questo è per accedere alla variabile tramite il nome */
@@ -473,6 +589,10 @@ bool	compile(const char *source, Chunk *chunk)
 {
 	/* innit dello scanner che produce token */
 	initScanner(source);
+	
+	/* init del compilatore */
+	Compiler compiler;
+	initCompiler(&compiler);
 
 	/* init del chunk attuale */
 	compilingChunk = chunk;
