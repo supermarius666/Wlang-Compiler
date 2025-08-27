@@ -28,6 +28,18 @@ static Value	peek(int distance)
 
 static bool call(ObjFunction *function, int argCount)
 {
+	if (argCount != function->arity) 
+	{
+		runtimeError("La funzione '%s' prende %d argomenti ma ho ricevuto %d.", function->name->chars, function->arity, argCount);
+		return (false);
+	}
+
+	if (vm.frameCount == FRAME_MAX)
+	{
+		runtimeError("Stack overflow :( ");
+		return (false);	
+	}
+
 	CallFrame *frame = &vm.frames[vm.frameCount++];
 	frame->function = function;
 	frame->ip = function->chunk.code;
@@ -87,10 +99,18 @@ static void runtimeError(const char *format, ...)
 	va_end(args);
 	fputs("\n", stderr);
 
-	CallFrame *frame = &vm.frames[vm.frameCount - 1];
-	size_t instruction = frame->ip - frame->function->chunk.code - 1;
-	int line = frame->function->chunk.lines[instruction];
-	fprintf(stderr, "[line %d] in %s\n", line, input_path);
+
+	for (int i = vm.frameCount - 1; i >= 0; i--)
+	{
+		CallFrame *frame = &vm.frames[i];
+		ObjFunction *function = frame->function;
+
+		size_t instruction = frame->ip - function->chunk.code - 1;
+		fprintf(stderr, "[linea %d] in ", function->chunk.lines[instruction]);
+		
+		if (function->name == NULL) fprintf(stderr, "main\n");
+		else fprintf(stderr, "%s()\n", function->name->chars);
+	}
 
 	resetStack();
 }

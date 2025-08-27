@@ -1,5 +1,14 @@
-fun ciao(){
-	stampa("come va")!!
+//una riga
+/*
+*
+*  più righe 
+*
+*/
+
+fun a() { b()!! }
+fun b() { c()!! }
+fun c() { 
+	c("uno", "due")!! 
 }
 
-stampa (ciao)!!
+a()!!
