@@ -26,7 +26,7 @@ static void			parsePrecedence(Precedence precedence);
 static void 		expression();
 static void			binary(bool canAssign);
 static void			literal(bool canAssign);
-static void 		call(canAssign);
+static void 		call(bool canAssign);
 static bool 		match(TokenType type);
 static void 		defineVariable(uint8_t global);
 static uint8_t 		makeCostant(Value value);
@@ -128,6 +128,7 @@ static void	emitByte(uint8_t byte)
 /* questa funzione aggiunge il return alla fine della compilazione del chunk */
 static void emitReturn()
 {
+	emitByte(OP_NIL);
 	emitByte(OP_RETURN);
 }
 
@@ -371,6 +372,21 @@ static void whileStatement()
 
 }
 
+/* return statement */
+static void returnStatement()
+{
+	if (current->type == TYPE_SCRIPT)
+		error("Non posso ritornare da qua :( ");
+	if (match(END_STM))
+		emitReturn();
+	else
+	{
+		expression();
+		consume(END_STM, "Manca il '!!' dopo il valore di ritorno.");
+		emitByte(OP_RETURN);
+	}
+}
+
 /* funzione per fare parsing degli stmt */
 static void statement()
 {
@@ -378,6 +394,8 @@ static void statement()
 		printStatement();
 	else if (match(SE))
 		ifStatement();
+	else if (match(RETURN))
+		returnStatement();
 	else if (match(MENTRE))
 		whileStatement();
 	else if (match(LEFT_BRACE))
@@ -751,7 +769,7 @@ static void	binary(bool canAssign)
 }
 
 /* funzione per le chiamate a funzione */
-static void call(canAssign)
+static void call(bool canAssign)
 {
 	uint8_t	argCount = argumentList();
 	emitBytes(OP_CALL, argCount);

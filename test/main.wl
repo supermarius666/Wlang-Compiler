@@ -1,14 +1,5 @@
-//una riga
-/*
-*
-*  più righe 
-*
-*/
-
-fun a() { b()!! }
-fun b() { c()!! }
-fun c() { 
-	c("uno", "due")!! 
+fun sum(a,b){
+	ritorna  (a+b)!!
 }
 
-a()!!
+stampa(sum(3,5))!!
