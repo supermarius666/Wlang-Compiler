@@ -1,5 +1,5 @@
-sia a = 10!!
-mentre (a >= 0) {
-	stampa(a)!!
-	a = a - 1!!
+fun ciao(){
+	stampa("come va")!!
 }
+
+stampa (ciao)!!

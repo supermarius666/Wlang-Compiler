@@ -23,6 +23,17 @@ static Obj *allocateObject(size_t size, ObjType type)
 	return (object);
 }
 
+ObjFunction	*newFunction()
+{
+	ObjFunction *function = ALLOCATE_OBJ(ObjFunction, OBJ_FUNCTION);
+
+	function->arity = 0;
+	function->name = NULL;
+	initChunk(&function->chunk);
+	return (function);
+}
+
+
 /* crea una nuova stringa e la alloca in heap; vengono inizializzati i suoi campi */
 static ObjString *allocateString(char *chars, int lenght, uint32_t hash)
 {
@@ -80,15 +91,34 @@ ObjString	*copyString(const char *chars, int lenght)
 	return (allocateString(heapChars, lenght, hash));
 }
 
+/* funzione per stampare le funzioni */
+static void printFunction(ObjFunction *function)
+{
+	if (function->name == NULL)
+	{
+		printf("<main>");
+		return;
+	}
+	printf("<fn %s>", function->name->chars);
+}
+
 void printObject(Value value)
 {
 	switch (OBJ_TYPE(value))
 	{
 		/* per stampare la stringa */
 		case OBJ_STRING:
+		{
 			printf("%s", AS_CSTRING(value));
 			break;
+		}
 		
+		case OBJ_FUNCTION:
+		{
+			printFunction(AS_FUNCTION(value));
+			break;
+		}
+
 		default:
 			break;
 	}

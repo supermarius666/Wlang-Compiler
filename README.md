@@ -5,16 +5,16 @@ For my Operating Systems course at university, I developed a simple compiler for
 ## Lexer
 - [ ] Finish documentation
 - [x] Error handling
-- [ ] Testing
+- [x] Testing
 - [x] Keywords
 
 Lexer’s grammar  -> the alphabet consists of individual characters and the strings are the valid lexemes
 
 ## Parser
 - [ ] Finish documentation
-- [ ] Error handling
+- [x] Error handling
 - [ ] Testing
-- [ ] Grammar Rappresentation (Backus-Naur form)
+- [x] Grammar Rappresentation (Backus-Naur form)
 
 Syntactic grammar(Parser's grammar) ->  each “letter” in the alphabet is an entire token and a “string” is a sequence of tokens, an entire expression.
 Single-Pass Compilation --> Parser ricorsivo 

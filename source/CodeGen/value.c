@@ -1,5 +1,6 @@
 #include "../../include/CodeGen/value.h"
 #include "../../include/CodeGen/memory.h"
+#include "../../include/CodeGen/object.h"
 #include <stdio.h>
 #include <string.h>
 

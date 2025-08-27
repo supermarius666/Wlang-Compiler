@@ -21,24 +21,33 @@ Chunk	*compilingChunk;
 Compiler	*current = NULL;
 
 /* forward declaration */
-static void statement();
-static void	parsePrecedence(Precedence precedence);
-static void expression();
-static void	binary(bool canAssign);
-static void	literal(bool canAssign);
-static bool match(TokenType type);
-static void defineVariable(uint8_t global);
-static uint8_t makeCostant(Value value);
-static void	block();
-static int emitJump(uint8_t instruction);
-static void patchJump(int offset);
-static void emitLoop(int loopStart);
+static void 		statement();
+static void			parsePrecedence(Precedence precedence);
+static void 		expression();
+static void			binary(bool canAssign);
+static void			literal(bool canAssign);
+static bool 		match(TokenType type);
+static void 		defineVariable(uint8_t global);
+static uint8_t 		makeCostant(Value value);
+static void			block();
+static int 			emitJump(uint8_t instruction);
+static void 		patchJump(int offset);
+static void 		emitLoop(int loopStart);
+static void 		funDeclaration();
+static void 		function(FunctionType type);
+static void 		initCompiler(Compiler *compiler, FunctionType type);
+static ObjFunction	*endCompiler();
+static void			emitBytes(uint8_t byte1, uint8_t byte2);
+static void 		markInitialized();
+
+
+
 
 
 /* ritorna il chunk attuale */
 static Chunk	*currentChunk()
 {
-	return (compilingChunk);
+	return (&current->function->chunk);
 }
 
 /* funzione che gestisce l'errore */
@@ -383,7 +392,9 @@ static void statement()
 /* funzione che si occupa degli stmt di dichiarazione */
 static void declaration()
 {
-	if (match(SIA))
+	if (match(FUN))
+		funDeclaration();
+	else if (match(SIA))
 		varDeclaration();	/* per dichiarazioni di variabile con 'sia' */
 	else
 		statement();
@@ -397,6 +408,47 @@ static void	block()
 	while (!check(RIGHT_BRACE) && !check(EOF))
 		declaration();
 	consume(RIGHT_BRACE, "Expected '}' after block.");
+}
+
+/*  */
+static void function(FunctionType type)
+{
+	Compiler compiler;
+	initCompiler(&compiler, type);
+	beginScope();
+
+	// parametri
+	consume(LEFT_PAREN, "Non dimenticare '(' subito dopo il nome della funzione!");
+	if (!check(RIGHT_PAREN))
+	{
+		do 
+		{
+			current->function->arity++;
+			if (current->function->arity > 255)
+				errorAtCurrent("Non puoi avere più di 255 parametri!");
+			
+			uint8_t paramConstant = parseVariable("Serve un nome al parametro.");
+			defineVariable(paramConstant);
+		}	while (match(COMMA));
+	}
+	consume(RIGHT_PAREN, "Non dimenticare ')' subito dopo i parametri della funzione!");
+
+	// corpo funzione
+	consume(LEFT_BRACE, "Non dimenticare '{' prima del corpo della funzione!");
+	block();
+
+	ObjFunction *function = endCompiler();
+	emitBytes(OP_CONSTANT, makeCostant(OBJ_VAL(function)));
+
+}
+
+/* dichiarazione di funzioni */
+static void funDeclaration()
+{
+	uint8_t	global = parseVariable("Manca il nome della funzione!");
+	markInitialized();
+	function(TYPE_FUNCTION);
+	defineVariable(global);
 }
 
 /* mi da l'indice della costante nella lista di costanti associate al chunk */
@@ -459,15 +511,29 @@ static void	emitCostant(Value value)
 	emitBytes(OP_CONSTANT, makeCostant(value));
 }
 
-static void initCompiler(Compiler *compiler)
+static void initCompiler(Compiler *compiler, FunctionType type)
 {
+	compiler->enclosing = current;
+	compiler->function = NULL;
+	compiler->type = type;
 	compiler->localCount = 0;
 	compiler->scopeDepth = 0;
+	compiler->function = newFunction();
 	current = compiler;
+
+	if (type != TYPE_SCRIPT) {
+		current->function->name = copyString(parser.previous.start, parser.previous.lenght);
+	}
+
+	Local *local = &current->locals[current->localCount++];
+	local->depth = 0;
+	local->name.start = "";
+	local->name.lenght = 0;
 }
 
 static void markInitialized()
 {
+	if (current->scopeDepth == 0) return;
 	current->locals[current->localCount - 1].depth = current->scopeDepth;
 }
 
@@ -486,12 +552,16 @@ static void defineVariable(uint8_t global)
 }
 
 /* questo chiude la compilazione con return */
-static void	endCompiler()
+static ObjFunction	*endCompiler()
 {
 	emitReturn();
+	ObjFunction *function = current->function;
 	#ifdef DEBUG_PRINT_CODE
-		if (!parser.hadError) disassembleChunk(currentChunk(), "code");
+		if (!parser.hadError) disassembleChunk(currentChunk(), function->name != NULL ? function->name->chars : "<main>");
 	#endif
+
+	current = current->enclosing;
+	return (function);
 }
 
 /* prende il lexema del literale number */
@@ -700,17 +770,17 @@ static void	parsePrecedence(Precedence precedence)
 		error("Invalid assignment target.");
 }
 
-bool	compile(const char *source, Chunk *chunk)
+ObjFunction	*compile(const char *source)
 {
 	/* innit dello scanner che produce token */
 	initScanner(source);
 	
 	/* init del compilatore */
 	Compiler compiler;
-	initCompiler(&compiler);
+	initCompiler(&compiler, TYPE_SCRIPT);
 
-	/* init del chunk attuale */
-	compilingChunk = chunk;
+	// /* init del chunk attuale */
+	// compilingChunk = chunk;
 
 	parser.hadError = false;
 	parser.panicMode = false;
@@ -720,60 +790,6 @@ bool	compile(const char *source, Chunk *chunk)
 	while (!match(EOF_TOKEN))
 		declaration();
 
-	endCompiler();
-	return (!parser.hadError);
-}
-
-
-/* utils */
-
-static const char *tokenTypeToString(TokenType type)
-{
-	switch (type)
-	{
-		case IDENTIFIER: return "IDENTIFIER";
-		case NUMBER: return "NUMBER";
-		case STRING: return "STRING";
-
-		case SIA: return "SIA";
-		case STAMPA: return "STAMPA";
-		case SE: return "SE";
-		case ALTRIMENTI: return "ALTRIMENTI";
-		case E: return "E";
-		case O: return "O";
-		case NON: return "NON";
-		case VERO: return "VERO";
-		case FALSO: return "FALSO";
-		case MAIN: return "MAIN";
-		case FUN: return "FUN";
-		case MENTRE: return "MENTRE";
-		case NULLA: return "NULLA";
-		case RETURN: return "RETURN";
-
-		case PLUS: return "PLUS";
-		case MINUS: return "MINUS";
-		case STAR: return "STAR";
-		case SLASH: return "SLASH";
-		case EQUAL: return "EQUAL";
-		case NOT_EQUAL: return "NOT_EQUAL";
-		case GREATER: return "GREATER";
-		case GREATER_EQUAL: return "GREATER_EQUAL";
-		case LESS: return "LESS";
-		case LESS_EQUAL: return "LESS_EQUAL";
-
-		case SEMICOLON: return "SEMICOLON";
-		case COMMA: return "COMMA";
-		case DOT: return "DOT";
-		case EQUALEQUAL: return "EQUALEQUAL";
-		case LEFT_PAREN: return "LEFT_PAREN";
-		case RIGHT_PAREN: return "RIGHT_PAREN";
-		case LEFT_BRACE: return "LEFT_BRACE";
-		case RIGHT_BRACE: return "RIGHT_BRACE";
-		case END_STM: return "END_STM";
-		case ERROR: return "ERROR";
-
-		case EOF_TOKEN: return "EOF_TOKEN";
-
-		default: return "UNKNOWN_TOKEN";
-	}
+	ObjFunction	*function = endCompiler();
+	return (parser.hadError ? NULL : function);
 }

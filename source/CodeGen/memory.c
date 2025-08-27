@@ -25,6 +25,15 @@ static void freeObject(Obj *object)
 			FREE(ObjString, object);
 			break;
 		}
+
+		/* libero la memeoria della funzione */
+		case OBJ_FUNCTION:
+		{
+			ObjFunction	*function = (ObjFunction *)object;
+			freeChunk(&function->chunk);
+			FREE(ObjFunction, object);
+			break;
+		}
 	
 	default:
 		break;

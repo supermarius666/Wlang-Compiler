@@ -117,5 +117,5 @@ void	writeValueArray(ValueArray *array, Value value);
 
 void	printValue(Value value);
 
-# include "object.h"
+// # include "object.h"
 #endif

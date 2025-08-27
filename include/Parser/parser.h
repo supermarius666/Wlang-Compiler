@@ -49,12 +49,23 @@ typedef struct
 	int		depth;
 }	Local;
 
-/* compiler struct */
-typedef struct 
+/* tipi di funzione */
+typedef enum
 {
-	Local	locals[UINT8_COUNT];
-	int 	localCount;
-	int		scopeDepth;
+	TYPE_FUNCTION,	/* */
+	TYPE_SCRIPT,
+}	FunctionType;
+
+/* compiler struct */
+typedef struct Compiler
+{
+	struct Compiler *enclosing;
+	ObjFunction		*function;
+	FunctionType	type;
+
+	Local			locals[UINT8_COUNT];
+	int 			localCount;
+	int				scopeDepth;
 }	Compiler;
 
 
