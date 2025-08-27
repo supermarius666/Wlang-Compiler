@@ -26,6 +26,7 @@ static void			parsePrecedence(Precedence precedence);
 static void 		expression();
 static void			binary(bool canAssign);
 static void			literal(bool canAssign);
+static void 		call(canAssign);
 static bool 		match(TokenType type);
 static void 		defineVariable(uint8_t global);
 static uint8_t 		makeCostant(Value value);
@@ -551,6 +552,22 @@ static void defineVariable(uint8_t global)
 	emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
+static uint8_t argumentList()
+{
+	uint8_t	argCount = 0;
+	if (!check(RIGHT_PAREN))
+	{
+		do {
+			expression();
+			if (argCount == 255)
+				error("Non puoi avere più di 255 parametri!");
+			argCount++;
+		}	while (match(COMMA));
+	}
+	consume(RIGHT_PAREN, "Non dimenticare ')' subito dopo i parametri della funzione!");
+	return (argCount);
+}
+
 /* questo chiude la compilazione con return */
 static ObjFunction	*endCompiler()
 {
@@ -645,7 +662,7 @@ static void variable(bool canAssign)
 
 /* questa è la tabella dei puntatori a funzione per ogni tipo di espressione */
 ParseRule rules []= {
-	[LEFT_PAREN]			=	{grouping, NULL, PREC_NONE}, 
+	[LEFT_PAREN]			=	{grouping, call, PREC_CALL}, 
 	[RIGHT_PAREN]			=	{NULL, NULL, PREC_NONE}, 
 	[LEFT_BRACE]			=	{NULL, NULL, PREC_NONE}, 
 	[RIGHT_BRACE]			=	{NULL, NULL, PREC_NONE}, 
@@ -731,6 +748,13 @@ static void	binary(bool canAssign)
 			return;
 	}
 
+}
+
+/* funzione per le chiamate a funzione */
+static void call(canAssign)
+{
+	uint8_t	argCount = argumentList();
+	emitBytes(OP_CALL, argCount);
 }
 
 /* funzione per i literals */

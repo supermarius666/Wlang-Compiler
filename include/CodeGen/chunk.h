@@ -43,6 +43,7 @@ typedef enum {
 	OP_JUMP_IF_FALSE,		/* per il branch false nell'if */
 	OP_JUMP,				/* jump normale */
 	OP_LOOP,				/* per i loop*/
+	OP_CALL,				/* per chiamate a funzione */
 	OP_RETURN,				/* return code */
 
 }	OpCode;
