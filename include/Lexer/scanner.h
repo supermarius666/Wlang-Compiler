@@ -18,7 +18,7 @@ typedef enum{
 
 	/* Arithmetic operators */
 	PLUS, MINUS, STAR, SLASH, EQUAL, NOT_EQUAL,
-	GREATER, GREATER_EQUAL, LESS, LESS_EQUAL,
+	GREATER, GREATER_EQUAL, LESS, LESS_EQUAL, MOD,
 
 	/* Punctuation, Parentheses and Others */
 	SEMICOLON, COMMA, DOT, EQUALEQUAL,

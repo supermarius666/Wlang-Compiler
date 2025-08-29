@@ -287,6 +287,7 @@ Token	scanToken()
 		case '-': return (makeToken(MINUS));
 		case '*': return (makeToken(STAR));
 		case '/': return (makeToken(SLASH));
+		case '%': return (makeToken(MOD));
 
 		/* lexing di due caratteri */
 		case '!':

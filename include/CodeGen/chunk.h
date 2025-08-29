@@ -21,6 +21,7 @@ typedef enum {
 	OP_SUB,					/* sottrazione */
 	OP_MUL,					/* moltiplicazione */
 	OP_DIV,					/* divisione */
+	OP_MOD,					/* resto divisione */
 
 	/* servono solo tre operatori per fare <, >, <=, >=, ==, != */
 	OP_EQUAL,				/* uguale */

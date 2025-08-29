@@ -694,6 +694,7 @@ ParseRule rules []= {
 
 	[SLASH]					=	{NULL, binary, PREC_FACTOR},
 	[STAR]					=	{NULL, binary, PREC_FACTOR},
+	[MOD]					=	{NULL, binary, PREC_FACTOR},
 
 	[NON]					= 	{unary, NULL, PREC_NONE},
 	[NOT_EQUAL]				= 	{NULL, binary, PREC_EQUAL},
@@ -747,6 +748,7 @@ static void	binary(bool canAssign)
 		case MINUS: emitByte(OP_SUB); break;
 		case STAR: emitByte(OP_MUL); break;
 		case SLASH: emitByte(OP_DIV); break;	
+		case MOD: emitByte(OP_MOD); break;
 		
 		/* ==
 		* >

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <math.h>
 
 /* forward declaration */
 static void runtimeError(const char *format, ...);
@@ -211,6 +212,27 @@ static InterpretResult run()
 			case OP_SUB: BINARY_OP(NUMBER_VAL, -); break;
 			case OP_DIV: BINARY_OP(NUMBER_VAL, /); break;
 			case OP_MUL: BINARY_OP(NUMBER_VAL, *); break;
+
+			case OP_MOD:
+			{
+				if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1)))
+				{
+					runtimeError("Gli operandi devono essere numeri!");
+					return (INTERPRET_RUNTIME_ERROR);
+				}
+				
+				double b = AS_NUMBER(pop());
+				double a = AS_NUMBER(pop());
+
+				if (b == 0.0)
+				{
+					runtimeError("Modulo by zero!");
+					return (INTERPRET_RUNTIME_ERROR);
+				}
+				push(NUMBER_VAL(fmod(a, b)));
+				break;
+			}
+
 			case OP_NEGATE:
 			{
 				/* validazione: verifico che in ho un numero in testa alla stack --> se non è un numero genero errore e fermo tutto */

@@ -15,6 +15,10 @@ add_executable(wlang
     source/Lexer/scanner.c
 )
 
+if (UNIX)
+  target_link_libraries(wlang m)
+endif()
+
 target_include_directories(wlang
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

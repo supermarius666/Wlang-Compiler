@@ -1,6 +1,2 @@
-fun hello(name)
-{
-	ritorna(name)!! 
-}
-
-stampa(hello("marius"))!!
+sia a!!
+stampa(a)!!
