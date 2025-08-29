@@ -275,7 +275,7 @@ static InterpretResult run()
 			case OP_PRINT:
 			{
 				printValue(pop());
-				printf("\n");  //per avere newline tra chiamate successive di stampa
+				// printf("\n");  //per avere newline tra chiamate successive di stampa
 				break;
 			}
 

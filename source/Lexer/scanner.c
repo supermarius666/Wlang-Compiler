@@ -1,5 +1,6 @@
 #include "../../include/CodeGen/common.h"
 #include "../../include/Lexer/scanner.h"
+#include "../../include/CodeGen/memory.h"
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>

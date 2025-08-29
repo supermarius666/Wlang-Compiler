@@ -606,13 +606,46 @@ static void	number(bool canAssign)
 	emitCostant(NUMBER_VAL(value));
 }
 
+
+/* funzione per i caratteri di escape */
+ static ObjString *unescapeStringLiteral(const char *src, int len) {
+    char *out = ALLOCATE(char, len + 1);
+    // oi --> output index
+	int oi = 0;
+    for (int i = 0; i < len; i++) {
+        char c = src[i];
+        if (c == '\\' && i + 1 < len) {
+            char n = src[++i];
+            switch (n) {
+                case 'n': out[oi++] = '\n'; break;
+                case 't': out[oi++] = '\t'; break;
+                case '"': out[oi++] = '"';  break;
+                case '\\': out[oi++] = '\\'; break;
+                case 's': out[oi++] = ' ';  break;
+                default:  out[oi++] = '\\'; out[oi++] = n; break;
+            }
+        } else {
+            out[oi++] = c;
+        }
+    }
+    out[oi] = '\0';
+    return takeString(out, oi);
+}
+
+
 /* */
 static void	string(bool canAssign)
 {
 	/*	prende la stringa direttamente dal lexema. Il +1 e -2 servono a togliere gli apici
 		dopo viene creato un oggetto string, messo in value e poi messo nella lista delle costanti 
 	*/
-	emitCostant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.lenght - 2)));
+
+	const char *raw = parser.previous.start + 1;
+	int rawLen = parser.previous.lenght - 2;
+
+	ObjString *s = unescapeStringLiteral(raw, rawLen);
+
+	emitCostant(OBJ_VAL(s));
 }
 
 /* grouping --> cose tra parentesi;  prefix expression --> significa che ha un token particolare con il quale inizia */
