@@ -1,53 +1,232 @@
-# Wlang-Compiler
-For my Operating Systems course at university, I developed a simple compiler for a small language I designed for fun. The project also includes a virtual machine simulation, as the compiler generates bytecode to be executed on it.
+# Wlang Compiler 
+### Introduzione
+Wlang è un piccolo linguaggio di programmazione che viene compilato in bytecode e il risultato viene eseguito su una macchina virtuale stack-based. E' stato realizzato prima il linguaggio e poi il compilatore che ha lo stesso nome. Questo progetto nasce con finalità didattiche e pratiche: imparare come si costruisce un compilatore molto semplice  e una VM portabile ed estendibile.
+
+## Linguaggio Wlang 
+Wlang è un linguaggio di alto livello orientato a scrivere piccoli script nonostante sia un linguaggio compilato. La sintassi è molto semplice ed è basata sulla lingua italiana.
+E' un linguaggio imperativo con una tipizzazione dinamica.
+
+#### Tipo supporati da Wlang:
+Il linguaggio Wlang supporta quattro tipo nativi:
+| Tipo      | Esempio          |
+|-----------|------------------|
+| NIL       |   nulla          |
+| BOOL      |   vero, falso    |
+|NUMBER     |   1, 2.0, 3.1415 |
+|STRING     |   "Wlang", "a"   |
+
+###### Operatori 
+In Wlang si possono usare questi operatori:
+| Operatore | Significato                          |
+|-----------|--------------------------------------|
+| `+`       | Somma                                |
+| `-`       | Sottrazione                          |
+|`*`        | Moltiplicazione                      |
+|`/`        | Divisione                            |
+|`%`        | Modulo                               |
+|`e`        | And                                  |
+|`o`        | Or                                   |
+| `<`       | Minore di                            |
+| `>`       | Maggiore di                          |
+| `<=`      | Minore o uguale a                    |
+| `>=`      | Maggiore o uguale a                  |
+| `==`      | Uguale a                             |
+| `!=`      | Diverso da                           |
+| `!!`      | Fine istruzione                      |
+|`non`      | Negazione                            |
+| `vero`    | True                                 |
+|`falso`    | False                                |
+
+#### Sintassi 
+La sintassi è molto simile a quella del linguaggio C. 
+###### Commenti
+Si possono creare commenti su una riga sola con `//`:
+```wlang
+// questo è un commento su una riga sola 
+```
+Si possono creare commenti su righe multiple con `/**/`: 
+```wlang
+/* questo è un commento su riga */
+
+/*
+*   Questo è
+*   un commento su 
+*   più righe 
+*/ 
+```
+###### Dichiarazione variabili
+Le variabili si possono dichiarare con la keyword `sia`. Ogni riga di istruzione deve finire con `!!`, simile a `;` nei linguaggi C, C++, JAVA, etc. 
+```wlang
+// dichiarazione 
+sia somma!!
+
+// dichiarazione e assegnazione 
+sia media = 0.0!!
+sia ok = vero!!
+sia nome = "Luca"!!
+```
+
+###### Stampa 
+Il linguaggio Wlang presenta una funzione built-in per la stampa. La funzione in questione è `stampa()`. E' molto facile da utilizzare:
+```wlang
+sia a = 3!!
+stampa(a)!!
+/* output: 3 */
+
+sia nome = "Francesco"!!
+stampa(nome)!!
+/* output: Francesco */
+
+sia b!!
+stampa(b)!!
+/* output: nulla */
+
+stampa (vero e non vero)!!
+/* output: falso */
+
+stampa(12 + 3)!!
+/* output: 15 */
+
+```
+In Wlang si può ottenere la concatenazione delle stringhe attraverso l'operatore `+`:
+```wlang
+sia nome = "Mario"!!
+sia cognome = "Rossi"!
+stampa("Il nome completo è " + nome + " " + cognome)!!
+/* output: Il nome completo è Mario Rossi */
+```
 
 
-## Lexer
-- [ ] Finish documentation
-- [x] Error handling
-- [x] Testing
-- [x] Keywords
+Infine, se non viene specificato nella stringa lo `\n`, due o più stampe successive compaiono sulla stessa riga:
+```wlang 
+stampa("uno ")!!
+stampa("due\n")!!
+/* output: uno due */
 
-Lexer’s grammar  -> the alphabet consists of individual characters and the strings are the valid lexemes
+stampa("uno\n")!!
+stampa("due\t")!!
+stampa("tre\n")!!
+/* output: 
+*   uno
+*   due     tre 
+*/
 
-## Parser
-- [ ] Finish documentation
-- [x] Error handling
-- [ ] Testing
-- [x] Grammar Rappresentation (Backus-Naur form)
+```
 
-Syntactic grammar(Parser's grammar) ->  each “letter” in the alphabet is an entire token and a “string” is a sequence of tokens, an entire expression.
-Single-Pass Compilation --> Parser ricorsivo 
-
-### Grammar
-Set of rules. Rules are called productions because they produce strings in the grammar.You can use them to generate strings that are in the grammar.  Strings created this way are called derivations because each is “derived” from the rules of the grammar.
-
-Each production in a context-free grammar has a head—its name—and a body 
-which describes what it generates. In its pure form, the body is simply a list of
-symbols. Symbols come in two delectable flavors:
-A terminal is a letter from the grammar’s alphabet. You can think of it like a
-literal value. In the syntactic grammar we’re defining, the terminals are
-individual lexemes—tokens coming from the scanner like if or 1234.
-These are called “terminals”, in the sense of an “end point” because they don’t lead to any further rule.
-A nonterminal is a named reference to another rule in the grammar. It
-means “play that rule and insert whatever it produces here”. In this way, the grammar composes.
+###### Escape
+Caratteri speciali:
+| Escape    | Significato      |
+|-----------|------------------|
+| `\n`      |  new line        |
+| `\t`      |   tab            |
+|  `\s`     |   space          |
+| `\"`      |   per usare gli apici nelle stringhe|
+| `\\`      |   per usare \ nelle stringhe |
 
 
-## ByteCode 
-Opcode --> istruzioni 
-Chunk --> array di byte che rappresentano istruzioni (o dati)
-Value --> tipo di dato che rappresenta i double
-ValueArray --> array per contenere tutte le costanti di un chunk di istruzioni
-disassembler --> serve per il debug
 
-### TODO
-- [ ] assolutamente aggiungere un garbage collector. per ora lo posso saltare, ma va aggiunto (page: 349)
-Attualmente ho una lista di references di oggetti allocati in modo dimanico nella VM. Ogni oggetto ha un puntatore al next.
+###### Condizioni 
+Per eseguire un pezzo di codice al verificarsi di una certa condizione si usa `se` e `altrimenti`:
+```wlang 
+sia a = 10!!
+se (a % 2 == 0)
+    stampa("pari")!!
+altrimenti
+    stampa("dispari")!!
+/* output: pari */
+```
 
-- [ ] devo rivedere la creazione di variabili e aggiungere il gb --> page: 381
+###### Cicli
+Il linguaggio Wlang mette a disposizione il ciclo `mentre`, simile al ciclo `while` di altri linguaggi:
+```wlang
+sia i = 10!!
+mentre (i >= 0)
+{
+    se (i % 2 == 0)
+    {
+        stampa ("pari\n")!!
+    }
+    altrimenti 
+    {
+        sia c = i * 2!!
+        stampa(c)!!
+        stampa("\n)!!
+    }
+    i = i - 1!!
+}
+stampa("fine\n")!!
 
-funzione di hash: https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+/*
+*   output: 
+*   pari
+*   18
+*   pari
+*   14
+*   pari
+*   10
+*   pari
+*   6
+*   pari
+*   2
+*   pari
+*   fine
+*/
+```
+###### Funzioni 
+Le funzioni si dichiarano con la keyword `fun`:
+```wlang
+fun somma(a, b)
+{
+    stampa(a + b)!!
+}
 
-per evitare copie inutili delle stringhe: string interning
+somma(2, 3)!!
+/* output: 5 */
+```
+Per far restituire qualcosa da una funzione si utilizza la keyword `ritorna`:
+```wlang 
+fun somma(a, b)
+{
+    ritorna (a + b)!!
+}
 
-page: 377
+sia a = somma(2, 3)!!
+sia c = somma(a, 4)!!
+stampa(c)!!
+/* output: 9 */
+```
+
+## Compilatore Wlang
+Il compilatore Wlang serve a compilare il linguaggio Wlang.
+Questo compilatore genera un bytecode che poi viene eseguito da una macchina virtuale. 
+
+#### Funzionamento 
+Per poter utilizzare il compilatore bisogna prima installarlo nel sistema:
+```bash
+./buid.sh 
+```
+Chiderà la password dell'utente per poter salvare l'eseguibile in `/usr/local/bin/`. In questo modo si potrà utilizzare l'eseguibile direttamente scrivendo il nome nel terminale, senza `./wlang`.
+
+Una volta installato in compilatore ci sono due modi in cui può essere usato:
+1. compilare ed eseguire direttamente il codice passato come sorgente:
+```bash
+wlang file.wl 
+```
+Questo genera direttamente il risultato del programma nel terminale.
+
+2. compilare il programma senza eseguirlo:
+```bash
+wlang -name output file.wl
+```
+In questo caso verrà generato un file binario nel formato `wlb`(wlang binary). Questo formato codifica in bianrio tutto il programma e può essere eseguito dalla macchina virtuale. 
+
+Per eseguire il codice binario sulla macchina virtuale si può fare:
+```bash
+wlang -b file.wlb
+```
+In questo modo si può vedere il risultato dell'esecuzione del programma.
+
+Infie, si può decidere dove salvare il file di output quando viene generato in questo modo:
+```bash
+wlang -name output file.wl -path <path>
+```

@@ -1,11 +1,9 @@
-fun pari(n)
+fun somma(a, b)
 {
-	se (n % 2 == 0)
-		ritorna ("pari\s")!!
-	altrimenti
-		ritorna ("dispari\s")!!
+    ritorna (a + b)!!
 }
 
-stampa(pari(1))!!
-stampa(pari(4))!!
-stampa(pari(5))!!
+sia a = somma(2, 3)!!
+sia c = somma(a, 4)!!
+stampa(c)!!
+stampa("\n")!!
