@@ -51,6 +51,9 @@ void	freeVm();
 /* interpreta il codice passato alla Vm*/
 InterpretResult	interpret(const char *source);
 
+/* per codice da .wlb*/
+InterpretResult runCompiled(ObjFunction* function);
+
 /* push sulla stack */
 void	push(Value value);
 

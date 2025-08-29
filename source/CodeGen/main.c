@@ -1,6 +1,8 @@
 #include "../../include/CodeGen/common.h"
 #include "../../include/CodeGen/chunk.h"
 #include "../../include/CodeGen/debug.h"
+#include "../../include/CodeGen/byte.h"
+#include "../../include/VM/compiler.h"
 #include "../../include/VM/vm.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,47 +55,98 @@ static void runFile(const char *path)
 	if (result == INTERPRET_RUNTIME_ERROR) exit(70);
 }
 
-
 int main(int argc, char **argv) 
 {
 	initVm();										// inizializza Vm 
 	if (argc == 1)
 	{
-		printf("============================= Wlang Compiler =============================\n");
-		printf("         Empowering your code with precision and power.\t\t\n");
-		printf("        Official Version: 1.0 - Build 2025-04-23\t\t\n");
-		printf("==========================================================================\n");
-		printf("Usage: wlang -name executable_name <files.wl>\n");
-		printf("This compiler is licensed under the Wlang Open License (WOL).\n");
-		printf("Redistribution and usage in source and binary forms, with or without modification,\n");
-		printf("are permitted provided that the following conditions are met:\n");
-		printf("1. Original copyright notice and disclaimers must be retained.\n");
-		printf("2. This software may not be used for evil purposes.\n");
-		printf("==========================================================================\n");
-		printf("Copyright (C) 2025 Wlang Project. All rights reserved.\n");
-		printf("==========================================================================\n");
-		freeVm();									// libera Vm
+		printf("============================= Compilatore Wlang =============================\n");
+		printf("          Potenzia il tuo codice con precisione e potenza.\t\t\n");
+		printf("           Versione ufficiale: 1.0 - Build 2025-04-23\t\t\n");
+		printf("=============================================================================\n");
+		printf("Questo compilatore è rilasciato sotto la Wlang Open License (WOL).\n");
+		printf("La redistribuzione e l'utilizzo, in forma sorgente o binaria, con o senza modifiche,\n");
+		printf("sono consentiti a condizione che siano rispettati i seguenti punti:\n");
+		printf("1. Le note di copyright originali e le clausole di esclusione di responsabilità\n");
+		printf("   devono essere mantenute.\n");
+		printf("2. Questo software non può essere utilizzato per scopi maligni.\n");
+		printf("=============================================================================\n");
+		printf("Copyright (C) 2025 Progetto Wlang. Tutti i diritti riservati.\n");
+		printf("=============================================================================\n");
+		freeVm();  // libera Vm
 		return (0);
+	}
 
-	}
-	else if (argc != 4 || strcmp(argv[1], "-name") != 0) {
-		fprintf(stderr, "Uso: %s -name nome_eseguibile file.wl\n", argv[0]);
-        return 1;
-	}
-	else
+
+	if (argc == 2 && (strcmp(argv[1], "-help") == 0 || strcmp(argv[1], "--help") == 0))
 	{
-		/* parte che creerà il file binario .wlb*/
-		output_file = argv[2];
-		input_path = argv[3];
-		runFile(argv[3]);
-		char filename[256];
-		snprintf(filename, sizeof(filename), "%s.wlb", output_file);
-		FILE* out = fopen(filename, "wb");
-		if (!out) {
-			perror("Errore creazione eseguibile");
-			return 1;
-		}
+		printf("Uso: wlang [opzioni] <file>\n\n");
+		printf("Opzioni disponibili:\n");
+		printf("  wlang file.wl             				Compila ed esegue subito il file sorgente.\n");
+		printf("  wlang -name <nome> file.wl 				Compila e salva 'nome.wlb' nella cartella corrente.\n");
+		printf("  wlang -name <nome> file.wl -path <dir> 		Compila e salva 'nome.wlb' dentro 'dir'.\n");
+		printf("  wlang -b file.wlb         				Carica ed esegue il bytecode da file.wlb.\n");
+		printf("  wlang -help               				Mostra questo messaggio di aiuto.\n");
+		freeVm();
+		return (0);
 	}
-		
-	return (0);
+
+    if (argc == 2 && argv[1][0] != '-') {
+        runFile(argv[1]);
+        freeVm();
+        return 0;
+    }
+
+	// wlang -name name file.wl  -> compila e salva name.wlb (non esegue)
+	if ((argc == 4 && strcmp(argv[1], "-name") == 0) || (argc == 6 && strcmp(argv[1], "-name") == 0 && strcmp(argv[4], "-path") == 0)) 
+	{
+		output_file = argv[2];   // nome base
+		input_path = argv[3];    // file sorgente
+
+		char *source = readFile(input_path);
+		ObjFunction *fn = compile(source);
+		free(source);
+		if (!fn) 
+		{ 
+			freeVm(); 
+			return (65); 
+		}
+
+		char filename[512];
+		if (argc == 6) {
+			// con -path: salvo <path>
+			snprintf(filename, sizeof(filename), "%s/%s.wlb", argv[5], output_file);
+		} else {
+			// senza -path: salvo nella cartella corrente
+			snprintf(filename, sizeof(filename), "%s.wlb", output_file);
+		}
+
+		if (!writeFunctionToFile(fn, filename)) {
+			fprintf(stderr, "Errore scrittura bytecode in '%s'.\n", filename);
+			freeVm(); 
+			return (74);
+		}
+
+		printf("Bytecode salvato in: %s\n", filename);
+		freeVm(); 	
+		return (0);
+	}
+
+	// wlang -b file.wlb  -> carica bytecode ed esegue
+	if (argc == 3 && strcmp(argv[1], "-b") == 0) 
+	{
+		const char *bytecodePath = argv[2];
+		ObjFunction *fn = readFunctionFromFile(bytecodePath);
+		if (!fn) 
+		{ 
+			fprintf(stderr, "Impossibile leggere bytecode da '%s'.\n", bytecodePath); 
+			freeVm(); 
+			return (74); 
+		}
+		InterpretResult r = runCompiled(fn); 
+		freeVm(); 
+		return ((r == INTERPRET_OK) ? 0 : 70);
+	}
+
+	return (1);
 }

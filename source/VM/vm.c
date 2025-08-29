@@ -388,6 +388,14 @@ InterpretResult	interpret(const char *source)
 	return (run());
 }
 
+InterpretResult runCompiled(ObjFunction* function)
+{
+    push(OBJ_VAL(function));
+    if (!callValue(OBJ_VAL(function), 0)) return INTERPRET_RUNTIME_ERROR;
+    return run();
+}
+
+
 void	push(Value value)
 {
 	*(vm.stackTop) = value;		/* salvo il valore da pushare nello spazio puntato dal SP*/

@@ -1,5 +1,6 @@
-fun sum(a,b){
-	ritorna  (a+b)!!
+fun hello(name)
+{
+	ritorna(name)!! 
 }
 
-stampa(sum(3,5))!!
+stampa(hello("marius"))!!
