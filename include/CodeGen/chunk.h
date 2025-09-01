@@ -6,15 +6,9 @@
 # include "value.h"
 
 
-/**
- * @enum
- * @brief Represents the different types of values or instructions that can be stored in a chunk.
- * 
- * This enumeration is used to define the various categories or types that are
- * utilized during code generation in the Wlang compiler.
- */
+/* enum che contiene tuttigli op code del linguaggio */
 typedef enum {
-	OP_CONSTANT,			/* for constant instructions like print (stampa)  --> takes a single byte operand that specifies which constant to load from the chunk's constant array*/
+	OP_CONSTANT,			/* per istruzioni costanti come la stampa */
 	OP_NEGATE,				/* negazione di un numero --> operatore unario */
 	OP_NOT,					/* il not logico, per invertire roba booleana */
 	OP_ADD,					/* somma */
@@ -49,13 +43,7 @@ typedef enum {
 
 }	OpCode;
 
-
-/**
- * @brief Represents a chunk of memory or data used in the code generation process.
- * 
- * This structure is used to store and manage a sequence of instructions
- * or data for the compiler's code generation phase.
- */
+/* Chunk di codice */
 typedef struct {
 	int			count;		/* how many spots are in use */
 	int			capacity;	/* capacity of the dynamic array */
@@ -97,6 +85,7 @@ void	freeChunk(Chunk *chunk);
  * @param byte The byte value to be written to the chunk.
  */
 void	writeChunk(Chunk *chunk, uint8_t byte, int line);
+
 
 int		addConstant(Chunk *chunk, Value value);
 

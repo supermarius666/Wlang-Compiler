@@ -27,17 +27,18 @@ static Value	peek(int distance)
 	return vm.stackTop[-1 - distance ];
 }
 
+/* funzione per la chiamata delle funzioni */
 static bool call(ObjFunction *function, int argCount)
 {
 	if (argCount != function->arity) 
 	{
-		runtimeError("La funzione '%s' prende %d argomenti ma ho ricevuto %d.", function->name->chars, function->arity, argCount);
+		runtimeError("\033[1;31mLa funzione\033[0m \033[1;36m'%s'\033[0m \033[1;31mprende %d argomenti ma ho ricevuto %d.\033[0m", function->name->chars, function->arity, argCount);
 		return (false);
 	}
 
 	if (vm.frameCount == FRAME_MAX)
 	{
-		runtimeError("Stack overflow :( ");
+		runtimeError("\033[1;31mStack overflow :( \033[0m");
 		return (false);	
 	}
 
@@ -63,7 +64,7 @@ static bool callValue(Value callee, int argCount)
 			break;
 		}
 	}
-	runtimeError("Puoi solo chiamare funzioni!");
+	runtimeError("\033[1;31mPuoi solo chiamare funzioni!\033[0m");
 	return (false);
 }
 
@@ -107,9 +108,9 @@ static void runtimeError(const char *format, ...)
 		ObjFunction *function = frame->function;
 
 		size_t instruction = frame->ip - function->chunk.code - 1;
-		fprintf(stderr, "[linea %d] in ", function->chunk.lines[instruction]);
+		fprintf(stderr, "\033[1;32m[linea %d] in \033[0m", function->chunk.lines[instruction]);
 		
-		if (function->name == NULL) fprintf(stderr, "main\n");
+		if (function->name == NULL) fprintf(stderr, "\033[1;34mmain\n\033[0m");
 		else fprintf(stderr, "%s()\n", function->name->chars);
 	}
 
@@ -160,7 +161,7 @@ static InterpretResult run()
 # define BINARY_OP(valueType, op) \
 	do { \
 		if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
-			runtimeError("Operands must be numbers.");	\
+			runtimeError("\033[1;31mGli operandi devono essere numeri.\033[0m");	\
 			return INTERPRET_RUNTIME_ERROR;	\
 		} \
 		double b = AS_NUMBER(pop()); 	\
@@ -204,7 +205,7 @@ static InterpretResult run()
 				}
 				else
 				{
-					runtimeError("Operands must be two numbers or two strings.");
+					runtimeError("\033[1;31mGli operandi devono essere due numeri o due stringhe.\033[0m");
 					return (INTERPRET_RUNTIME_ERROR);
 				}
 				break;
@@ -217,7 +218,7 @@ static InterpretResult run()
 			{
 				if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1)))
 				{
-					runtimeError("Gli operandi devono essere numeri!");
+					runtimeError("\033[1;31mGli operandi devono essere numeri!\033[0m");
 					return (INTERPRET_RUNTIME_ERROR);
 				}
 				
@@ -226,7 +227,7 @@ static InterpretResult run()
 
 				if (b == 0.0)
 				{
-					runtimeError("Modulo by zero!");
+					runtimeError("\033[1;31mModulo di zero!\033[0m");
 					return (INTERPRET_RUNTIME_ERROR);
 				}
 				push(NUMBER_VAL(fmod(a, b)));
@@ -238,7 +239,7 @@ static InterpretResult run()
 				/* validazione: verifico che in ho un numero in testa alla stack --> se non è un numero genero errore e fermo tutto */
 				if (!IS_NUMBER(peek(0)))
 				{
-					runtimeError("Operand must be a number.");
+					runtimeError("\033[1;31mGli operandi devono essere numeri!\033[0m");
 					return INTERPRET_RUNTIME_ERROR;
 				}
 				push(NUMBER_VAL(-AS_NUMBER(pop())));
@@ -299,7 +300,7 @@ static InterpretResult run()
 
 				if (!tableGet(&vm.globals, name, &value))
 				{
-					runtimeError("Undefined variable '%s'.", name->chars);
+					runtimeError("\033[1;31mVariabile non definita: '%s'.\033[0m", name->chars);
 					return (INTERPRET_RUNTIME_ERROR);
 				}
 
@@ -314,7 +315,7 @@ static InterpretResult run()
 				if (tableSet(&vm.globals, name, peek(0)))
 				{
 					tableDelete(&vm.globals, name);
-					runtimeError("Cannot assign to undefined variable '%s'.", name->chars);
+					runtimeError("\033[1;31mImpossibile assegnare qualcosa ad una variabile non definita: '%s'.\033[0m", name->chars);
 					return (INTERPRET_RUNTIME_ERROR);
 				}
 				
@@ -400,11 +401,6 @@ InterpretResult	interpret(const char *source)
 	if (function == NULL) return (INTERPRET_COMPILE_ERROR);
 
 	push(OBJ_VAL(function));
-	// CallFrame *frame = &vm.frames[vm.frameCount++];
-	// frame->function = function;
-	// frame->ip = function->chunk.code;
-	// frame->slots = vm.stack;
-
 	callValue(OBJ_VAL(function), 0);
 
 	return (run());

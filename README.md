@@ -2,6 +2,42 @@
 ### Introduzione
 Wlang è un piccolo linguaggio di programmazione che viene compilato in bytecode e il risultato viene eseguito su una macchina virtuale stack-based. E' stato realizzato prima il linguaggio e poi il compilatore che ha lo stesso nome. Questo progetto nasce con finalità didattiche e pratiche: imparare come si costruisce un compilatore molto semplice  e una VM portabile ed estendibile.
 
+## Compilatore Wlang
+Il compilatore Wlang serve a compilare il linguaggio Wlang.
+Questo compilatore genera un bytecode che poi viene eseguito da una macchina virtuale. 
+
+#### Funzionamento 
+Per poter utilizzare il compilatore bisogna prima creare la cartella build e poi installarlo nel sistema:
+```bash
+mkdir build
+./buid.sh 
+```
+Chiderà la password dell'utente per poter salvare l'eseguibile in `/usr/local/bin/`. In questo modo si potrà utilizzare l'eseguibile direttamente scrivendo il nome nel terminale, senza `./wlang`.
+
+Una volta installato in compilatore ci sono due modi in cui può essere usato:
+1. compilare ed eseguire direttamente il codice passato come sorgente:
+```bash
+wlang file.wl 
+```
+Questo genera direttamente il risultato del programma nel terminale.
+
+2. compilare il programma senza eseguirlo:
+```bash
+wlang -name output file.wl
+```
+In questo caso verrà generato un file binario nel formato `wlb`(wlang binary). Questo formato codifica in bianrio tutto il programma e può essere eseguito dalla macchina virtuale. 
+
+Per eseguire il codice binario sulla macchina virtuale si può fare:
+```bash
+wlang -b file.wlb
+```
+In questo modo si può vedere il risultato dell'esecuzione del programma.
+
+Infie, si può decidere dove salvare il file di output quando viene generato in questo modo:
+```bash
+wlang -name output file.wl -path <path>
+```
+
 ## Linguaggio Wlang 
 Wlang è un linguaggio di alto livello orientato a scrivere piccoli script nonostante sia un linguaggio compilato. La sintassi è molto semplice ed è basata sulla lingua italiana.
 E' un linguaggio imperativo con una tipizzazione dinamica.
@@ -196,37 +232,3 @@ stampa(c)!!
 /* output: 9 */
 ```
 
-## Compilatore Wlang
-Il compilatore Wlang serve a compilare il linguaggio Wlang.
-Questo compilatore genera un bytecode che poi viene eseguito da una macchina virtuale. 
-
-#### Funzionamento 
-Per poter utilizzare il compilatore bisogna prima installarlo nel sistema:
-```bash
-./buid.sh 
-```
-Chiderà la password dell'utente per poter salvare l'eseguibile in `/usr/local/bin/`. In questo modo si potrà utilizzare l'eseguibile direttamente scrivendo il nome nel terminale, senza `./wlang`.
-
-Una volta installato in compilatore ci sono due modi in cui può essere usato:
-1. compilare ed eseguire direttamente il codice passato come sorgente:
-```bash
-wlang file.wl 
-```
-Questo genera direttamente il risultato del programma nel terminale.
-
-2. compilare il programma senza eseguirlo:
-```bash
-wlang -name output file.wl
-```
-In questo caso verrà generato un file binario nel formato `wlb`(wlang binary). Questo formato codifica in bianrio tutto il programma e può essere eseguito dalla macchina virtuale. 
-
-Per eseguire il codice binario sulla macchina virtuale si può fare:
-```bash
-wlang -b file.wlb
-```
-In questo modo si può vedere il risultato dell'esecuzione del programma.
-
-Infie, si può decidere dove salvare il file di output quando viene generato in questo modo:
-```bash
-wlang -name output file.wl -path <path>
-```

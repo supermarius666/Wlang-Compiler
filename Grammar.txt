@@ -1,23 +1,80 @@
-grammar v.1
+script          := declaration* EOF ;
 
-expression	->	literal 
-			|	unary
-			|	binary
-			|	grouping	;
+declaration     := varDecl
+                 | funDecl
+                 | statement ;
 
-literal		->	NUMBER | STRING | "vero" | "falso"	;
-grouping	->	"(" expression ")"	;
-unary		->	( "-" | "!" ) expression	;
-binary		->	expression	operator	expression	;
-operator	->	"==" | "!="	| "<" | "<=" | ">" | ">=" |
-				"+"  |  "-" | "*" | "/"	;
+varDecl         := "sia" IDENT ( "=" expression )? "!!" ;
 
-statement	->		exprStmt
-				|	printStm	
-				|	block ;
-block		->	"{" declaration* "}" ;
+funDecl         := "fun" IDENT "(" paramList? ")" block ;
+paramList       := IDENT ( "," IDENT )* ;
 
+statement       := printStmt
+                 | returnStmt
+                 | ifStmt
+                 | whileStmt
+                 | block
+                 | exprStmt ;
 
-lowercase 	--> for production rules (non terminals)
-" "		  	--> for terminals (tokens)
-capitalize	--> for  terminals that are a single lexeme whose text representation may vary.
+printStmt       := "stampa" "(" argumentList? ")" "!!" ;
+
+returnStmt      := "ritorna" ( "!!" | expression "!!" ) ;
+
+ifStmt          := "se" "(" expression ")" block ( "altrimenti" block )? ;
+
+whileStmt       := "mentre" "(" expression ")" block ;
+
+block           := "{" declaration* "}" ;
+
+exprStmt        := expression "!!" ;
+
+argumentList    := expression ( "," expression )* ;
+
+expression      := assignment ;
+
+assignment      := IDENT "=" assignment
+                 | or ;
+
+or              := and ( "o" and )* ;          
+and             := equality ( "e" equality )* ;
+
+equality        := comparison ( ( "==" | "!=" ) comparison )* ;
+
+comparison      := term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+
+term            := factor ( ( "+" | "-" ) factor )* ;
+
+factor          := unary ( ( "*" | "/" | "%" ) unary )* ;
+
+unary           := ( "!" | "-" ) unary
+                 | call ;
+
+call            := primary ( "(" argumentList? ")" )* ;
+
+primary         := NUMBER
+                 | STRING
+                 | "vero"
+                 | "falso"
+                 | "nulla"
+                 | IDENT
+                 | "(" expression ")" ;
+```
+
+Lessico (token)
+
+- IDENT: [A-Za-z_][A-Za-z0-9_]*
+- NUMBER: [0-9]+("." [0-9]+)?
+- STRING: '"' (caratteri | escape)* '"'
+  - escape supportate: \n \t \\ \" \s
+- Terminatore di statement: "!!"
+
+Precedenza operatori (dal più basso al più alto)
+
+- assegnazione: =
+- or: o
+- and: e
+- uguaglianza: == !=
+- confronto: > >= < <=
+- somma: + -
+- prodotto: * / (%) opzionale
+- unari: ! -

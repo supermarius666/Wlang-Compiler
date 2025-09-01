@@ -5,7 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 
-/* variabile globale scanner (lexer)*/
+/* variabile globale scanner (lexer) */
 Scanner	scanner;
 
 /* questa funzione mi dice se ho raggiunto la fine del codice sorgente */
@@ -44,6 +44,7 @@ static bool match(char expected)
 	return (true);
 }
 
+/* questa funzione verifica se il carattere c è una carattere alfabetico o _*/
 static bool	isAlpha(char c)
 {
 	return ((c >= 'a' && c <= 'z') ||
@@ -64,6 +65,9 @@ static Token	makeToken(TokenType type)
 	return (token);
 }
 
+/* questa funzione salta gli spazi bianchi che devono essere ignorati dallo scanner
+*  e si occupa anche dei commenti; anche i commenti devono essere ignorati dal lexer
+*/
 static void	skipWhiteSpace()
 {
 	while (true)
@@ -119,6 +123,9 @@ static void	skipWhiteSpace()
 	}
 }
 
+/* questa funzione è una funzione helper di identifierType e serve a confrontare se il resto della parola 
+*  coincide con la keyword
+*/
 static TokenType	checkKeyword(int start, int lenght, const char *rest, TokenType type)
 {
 	/* controllo che anche le lettere dopo siano giuste nella keyword */
@@ -219,6 +226,7 @@ static Token	errorToken(const char *message)
 	return (token);
 }
 
+/* funzione che inizializza lo scanner */
 void	initScanner(const char *source)
 {
 	scanner.start = source;
@@ -235,7 +243,7 @@ static Token	string()
 		advance();
 	}
 
-	if (isAtEnd()) return (errorToken("Untermined String."));
+	if (isAtEnd()) return (errorToken("\033[1;31mStringa non terminata!\033[0m"));
 
 	advance();
 	return (makeToken(STRING));
@@ -295,7 +303,7 @@ Token	scanToken()
 		{
 			if (match('!')) return (makeToken(END_STM));
 			else if (match('=')) return (makeToken(NOT_EQUAL));
-			else return (errorToken("Unexpected character."));
+			else return (errorToken("\033[1;31mCarattere non riconoscito!\033[0m"));
 		}
 		case '=':
 		{
@@ -320,5 +328,5 @@ Token	scanToken()
 		case '"': return (string());
 	}
 
-	return errorToken("Unexpected character.");
+	return errorToken("\033[1;31mCarattere non riconoscito!\033[0m");
 }

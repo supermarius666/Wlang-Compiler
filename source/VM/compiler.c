@@ -57,13 +57,13 @@ static void	errorAt(Token *token, const char *message)
 	if (parser.panicMode) return;
 	parser.panicMode = true;	/* se è attivo --> tutti gli altri errori successivi sono ignorati */
 
-	fprintf(stderr, "[Line %d] Error", token->line);
+	fprintf(stderr, "\033[1;32m[Line %d]\033[0m \033[1;31mError\033[0m", token->line);
 
-	if (token->type == EOF) fprintf(stderr, " at end");
+	if (token->type == EOF) fprintf(stderr, " \033[1;31mat end\033[0m");
 	else if (token->type == ERROR) { /* nulla */ }
-	else fprintf(stderr, " at '%.*s'", token->lenght, token->start);
+	else fprintf(stderr, "\033[1;31m at '%.*s'\033[0m", token->lenght, token->start);
 	
-	fprintf(stderr, ": %s\n", message);
+	fprintf(stderr, "\033[1;31m: %s\n\033[0m", message);
 	parser.hadError = true;
 }
 
@@ -140,7 +140,7 @@ static void	expression()
 
 static void printStatement()
 {
-	consume(LEFT_PAREN, "Expected '(' after 'stampa'.");
+	consume(LEFT_PAREN, "\033[1;31mNon dimenticare '(' dopo 'stampa'.\033[0m");
     expression();
 
 	if (match(END_STM)) 
@@ -150,8 +150,8 @@ static void printStatement()
         return;
     }
 
-    consume(RIGHT_PAREN, "Expected ')' after expression.");
-    consume(END_STM, "Expected '!!' after expression.");
+    consume(RIGHT_PAREN, "\033[1;31mManca ')' dopo l'espressione.\033[0m");
+    consume(END_STM, "\033[1;31mManca '!!' dopo l'espressione.\033[0m");
     emitByte(OP_PRINT);
 }
 
@@ -191,7 +191,7 @@ static void synchronize()
 static void expressionStatement()
 {
 	expression();
-	consume(END_STM, "Expected '!!' after expression.");
+	consume(END_STM, "\033[1;31mManca '!!' dopo l'espressione.\033[0m");
 	emitByte(OP_POP);
 }
 
@@ -210,7 +210,7 @@ static void addLocal(Token name)
 {
 	if (current->localCount == UINT8_COUNT)
 	{
-		error("Too many local variables in function.");
+		error("\033[1;31mTroppe variabili in una funzione!\033[0m");
 		return;
 	}
 
@@ -234,7 +234,7 @@ static int resolveLocal(Compiler *compiler, Token *name)
 		if (identifiersEqual(name, &local->name))
 		{
 			if (local->depth == -1)
-				error("Can't read local variable in its own initializer.");
+				error("\033[1;31mStai ridefinendo la stessa variabile!\033[0m.");
 			return (i);
 		}
 	}
@@ -257,7 +257,7 @@ static void declareVariable()
 			break;
 		
 		if (identifiersEqual(name, &local->name))
-			error("Already variable with the same name in this scope.");
+			error("\033[1;31mStai ridefinendo la stessa variabile nello stesso scope!\033[0m");
 	}
 
 	addLocal(*name);
@@ -299,7 +299,7 @@ static uint8_t parseVariable(const char *errorMessage)
 /* funzione per la dichiarazione di variabili */
 static void varDeclaration()
 {
-	uint8_t	global = parseVariable("Expected variable name.");
+	uint8_t	global = parseVariable("\033[1;31mManca il nome della variabile\033[0m");
 
 	/* se c'è l'uguale prendo l'espressione */
 	if (match(EQUAL))
@@ -308,7 +308,7 @@ static void varDeclaration()
 	else
 		emitByte(OP_NIL);
 	
-	consume(END_STM, "Expected '!!' after expression.");
+	consume(END_STM, "\033[1;31mManca '!!' dopo l'espressione.\033[0m");
 	
 	/* definisco la variabile globale */
 	defineVariable(global);
@@ -336,9 +336,9 @@ static void endScope()
 /* funzione per gestire l'if */
 static void ifStatement()
 {
-	consume(LEFT_PAREN, "Expected '(' after 'se'.");
+	consume(LEFT_PAREN, "\033[1;31mManca '(' dopo il 'se'\033[0m.");
 	expression();
-	consume(RIGHT_PAREN, "Expected ')' after condition.");
+	consume(RIGHT_PAREN, "\033[1;31mManca ')' dopo la condizione.\033[0m");
 
 	int thenJump = emitJump(OP_JUMP_IF_FALSE);
 	emitByte(OP_POP);
@@ -357,9 +357,9 @@ static void whileStatement()
 {
 	int loopStart = currentChunk()->count;
 
-	consume(LEFT_PAREN, "Expected '(' after 'mentre'.");
+	consume(LEFT_PAREN, "\033[1;31mManca '(' dopo 'mentre'.\033[0m");
 	expression();
-	consume(RIGHT_PAREN, "Expected ')' after condition.");
+	consume(RIGHT_PAREN, "\033[1;31mManca ')' dopo la condizione.\033[0m");
 
 	int exitJump = emitJump(OP_JUMP_IF_FALSE);
 	emitByte(OP_POP);
@@ -376,13 +376,13 @@ static void whileStatement()
 static void returnStatement()
 {
 	if (current->type == TYPE_SCRIPT)
-		error("Non posso ritornare da qua :( ");
+		error("\033[1;31mNon posso ritornare da qua :( \033[0m");
 	if (match(END_STM))
 		emitReturn();
 	else
 	{
 		expression();
-		consume(END_STM, "Manca il '!!' dopo il valore di ritorno.");
+		consume(END_STM, "\033[1;31mManca il '!!' dopo il valore di ritorno.\033[0m");
 		emitByte(OP_RETURN);
 	}
 }
@@ -426,7 +426,7 @@ static void	block()
 {
 	while (!check(RIGHT_BRACE) && !check(EOF))
 		declaration();
-	consume(RIGHT_BRACE, "Expected '}' after block.");
+	consume(RIGHT_BRACE, "\033[1;31mManca '}' dopo il blocco di codice\033[0m.");
 }
 
 /*  */
@@ -437,23 +437,23 @@ static void function(FunctionType type)
 	beginScope();
 
 	// parametri
-	consume(LEFT_PAREN, "Non dimenticare '(' subito dopo il nome della funzione!");
+	consume(LEFT_PAREN, "\033[1;31mNon dimenticare '(' subito dopo il nome della funzione!\033[0m");
 	if (!check(RIGHT_PAREN))
 	{
 		do 
 		{
 			current->function->arity++;
 			if (current->function->arity > 255)
-				errorAtCurrent("Non puoi avere più di 255 parametri!");
+				errorAtCurrent("\033[1;31mNon puoi avere più di 255 parametri!\033[0m");
 			
-			uint8_t paramConstant = parseVariable("Serve un nome al parametro.");
+			uint8_t paramConstant = parseVariable("\033[1;31mServe un nome al parametro.\033[0m");
 			defineVariable(paramConstant);
 		}	while (match(COMMA));
 	}
-	consume(RIGHT_PAREN, "Non dimenticare ')' subito dopo i parametri della funzione!");
+	consume(RIGHT_PAREN, "\033[1;31mNon dimenticare ')' subito dopo i parametri della funzione!\033[0m");
 
 	// corpo funzione
-	consume(LEFT_BRACE, "Non dimenticare '{' prima del corpo della funzione!");
+	consume(LEFT_BRACE, "\033[1;31mNon dimenticare '{' prima del corpo della funzione!\033[0m");
 	block();
 
 	ObjFunction *function = endCompiler();
@@ -464,7 +464,7 @@ static void function(FunctionType type)
 /* dichiarazione di funzioni */
 static void funDeclaration()
 {
-	uint8_t	global = parseVariable("Manca il nome della funzione!");
+	uint8_t	global = parseVariable("\033[1;31mManca il nome della funzione!\033[0m");
 	markInitialized();
 	function(TYPE_FUNCTION);
 	defineVariable(global);
@@ -476,7 +476,7 @@ static uint8_t makeCostant(Value value)
 	int costant = addConstant(currentChunk(), value);
 	if (costant > UINT8_MAX)  /* in futuro si potrebbe espandere --> posso avere 256 costanti per chunk */
 	{
-		error("Too many costants in one chunk");
+		error("\033[1;31mTroppe costanti in un solo chunk\033[0m");
 		return (0);
 	}
 	return ((uint8_t)costant);
@@ -505,7 +505,7 @@ static void emitLoop(int loopStart)
 {
 	emitByte(OP_LOOP);
 	int offset = currentChunk()->count - loopStart + 2;
-	if (offset > UINT16_MAX) error("Loop body too large.");
+	if (offset > UINT16_MAX) error("\033[1;31mIl corpo del loop è tropo grande\033[0m");
 
 	emitByte((offset >> 8) & 0xff);
 	emitByte(offset & 0xff);
@@ -517,7 +517,7 @@ static void patchJump(int offset)
 	int jump = currentChunk()->count - offset - 2;
 
 	if (jump > UINT16_MAX)
-		error("Too much code to jump. Out of code.");
+		error("\033[1;35mFinalmente sono libero: fuori dal codice!!!!\033[0m");
 	
 		currentChunk()->code[offset] = (jump >> 8) & 0xff;
 		currentChunk()->code[offset + 1] = jump & 0xff;
@@ -578,11 +578,11 @@ static uint8_t argumentList()
 		do {
 			expression();
 			if (argCount == 255)
-				error("Non puoi avere più di 255 parametri!");
+				error("\033[1;31mNon puoi avere più di 255 parametri!\033[0m");
 			argCount++;
 		}	while (match(COMMA));
 	}
-	consume(RIGHT_PAREN, "Non dimenticare ')' subito dopo i parametri della funzione!");
+	consume(RIGHT_PAREN, "\033[1;31mNon dimenticare ')' subito dopo i parametri della funzione!\033[0m");
 	return (argCount);
 }
 
@@ -652,7 +652,7 @@ static void	string(bool canAssign)
 static void	grouping(bool canAssign)
 {
 	expression();
-	consume(RIGHT_PAREN, "Expected ')' after expression.");
+	consume(RIGHT_PAREN, "\033[1;31mManca ')' dopo l'espressione.\033[0m");
 }
 
 /* negazione --> prefix expression */
@@ -830,7 +830,7 @@ static void	parsePrecedence(Precedence precedence)
 	ParseFn prefixRule = getRule(parser.previous.type)->prefix;
 	if (prefixRule == NULL) 
 	{
-		error("Expect expression.");
+		error("\033[1;31mManca l'espressione\033[0m");
 		return;
 	}
 	bool canAssign = precedence <= PREC_ASSIGNMENT;
@@ -844,7 +844,7 @@ static void	parsePrecedence(Precedence precedence)
 	}
 
 	if (canAssign && match(EQUAL))
-		error("Invalid assignment target.");
+		error("\033[1;31mInvalid assignment target.\033[0m");
 }
 
 ObjFunction	*compile(const char *source)
