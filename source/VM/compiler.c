@@ -22,6 +22,7 @@ Compiler	*current = NULL;
 
 /* forward declaration */
 static void 		statement();
+static void			declaration();
 static void			parsePrecedence(Precedence precedence);
 static void 		expression();
 static void			binary(bool canAssign);
@@ -40,6 +41,7 @@ static void 		initCompiler(Compiler *compiler, FunctionType type);
 static ObjFunction	*endCompiler();
 static void			emitBytes(uint8_t byte1, uint8_t byte2);
 static void 		markInitialized();
+static void			includeDeclaration();
 
 
 
@@ -314,6 +316,61 @@ static void varDeclaration()
 	defineVariable(global);
 }
 
+static void includeDeclaration()
+{
+	Scanner	oldScanner;
+	Token	oldCurrent;
+	Token	oldPrevious;
+
+	// 0. Controllo difensivo 
+	if (!check(STRING)) {
+		errorAtCurrent("\033[1;31mAspettavo il nome del file (in formato stringa) dopo 'includi'.\033[0m");
+		return; 
+	}
+
+	// 1. Prendo il nome del file (stringa)
+	consume(STRING, "");
+	
+	// Rimuovo le virgolette dal nome del file
+	int len = parser.previous.lenght - 2; 
+	char *filename = ALLOCATE(char, len + 1);
+	memcpy(filename, parser.previous.start + 1, len);
+	filename[len] = '\0';
+
+	// 2. Consumo il fine statement (!!)
+	consume(END_STM, "\033[1;31mManca '!!' alla fine dell'includi.\033[0m");
+
+	// 3. Leggo il file dal disco
+	char *source = readFile(filename);
+	if (source == NULL) {
+		error("\033[1;31mImpossibile leggere il file incluso.\033[0m");
+		FREE_ARRAY(char, filename, len + 1);
+		return;
+	}
+
+	// 4. SALVO LO STATO ATTUALE
+	oldScanner = saveScanner();
+	oldCurrent = parser.current;
+	oldPrevious = parser.previous;
+
+	// 5. INIZIALIZZO LO SCANNER PER IL NUOVO FILE E COMPILO
+	initScanner(source);
+	advance(); // Carica il primo token del file incluso
+
+	while (!match(EOF_TOKEN)) {
+		declaration();
+	}
+
+	// 6. RIPRISTINO LO STATO ORIGINALE
+	restoreScanner(oldScanner);
+	parser.current = oldCurrent;
+	parser.previous = oldPrevious;
+
+	// Pulizia memoria
+	free(source);
+	FREE_ARRAY(char, filename, len + 1);
+}
+
 
 /* begin Scope function */
 static void beginScope()
@@ -415,6 +472,8 @@ static void declaration()
 		funDeclaration();
 	else if (match(SIA))
 		varDeclaration();	/* per dichiarazioni di variabile con 'sia' */
+	else if (match(INCLUDI))
+		includeDeclaration();
 	else
 		statement();
 

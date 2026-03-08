@@ -11,12 +11,12 @@
 const char* output_file = NULL;
 const char* input_path = NULL;
 
-static char *readFile(const char *path)
+char *readFile(const char *path)
 {
 	FILE *file = fopen(path, "rb");
 	if (!file)
 	{
-		fprintf(stderr, "Could not open the file '%s' \n", path);
+		fprintf(stderr, "Impossibile aprire il file '%s' \n", path);
 		exit(74);
 	}
 
@@ -35,7 +35,7 @@ static char *readFile(const char *path)
 	size_t bytesRead = fread(buffer, sizeof(char), fileSize, file); 
 	if (bytesRead < fileSize)
 	{
-		fprintf(stderr, "Could not read the file '%s' \n", path);
+		fprintf(stderr, "Impossibile leggere il file '%s' \n", path);
 		exit(74);
 	}
 	buffer[bytesRead] = '\0';

@@ -8,13 +8,19 @@ typedef struct {
 	int			line;
 }	Scanner;
 
+/* funzione per salvare lo stato dello scanner --> per includere file */
+Scanner	saveScanner();
+
+/* funzione che ripristina lo stato dello scanner */
+void	restoreScanner(Scanner state);
+
 typedef enum{
     /* Literals */
 	IDENTIFIER, NUMBER, STRING,
 
 	/* Keywords */
 	SIA, STAMPA, SE, ALTRIMENTI, MENTRE, NULLA,
-	E, O, NON, VERO, FALSO, MAIN, FUN, RETURN, 
+	E, O, NON, VERO, FALSO, MAIN, FUN, RETURN, INCLUDI,
 
 	/* Arithmetic operators */
 	PLUS, MINUS, STAR, SLASH, EQUAL, NOT_EQUAL,

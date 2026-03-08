@@ -12,4 +12,6 @@
 extern const char* output_file;
 extern const char* input_path;
 
+char	*readFile(const char *path);
+
 #endif

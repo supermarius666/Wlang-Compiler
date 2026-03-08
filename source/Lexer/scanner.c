@@ -190,6 +190,7 @@ static TokenType identifierType()
 		case 'a': return (checkKeyword(1, 9,  "ltrimenti",  ALTRIMENTI));
 		case 'e': return (checkKeyword(1, 0,  "",  E));
 		case 'o': return (checkKeyword(1, 0,  "",  O));
+		case 'i': return (checkKeyword(1, 6, "ncludi", INCLUDI));
 		case 'r': return (checkKeyword(1, 6,  "itorna",  RETURN));
 		case 'n': 
 		{
@@ -329,4 +330,22 @@ Token	scanToken()
 	}
 
 	return errorToken("\033[1;31mCarattere non riconoscito!\033[0m");
+}
+
+Scanner saveScanner()
+{
+	Scanner	state;
+
+	state.start = scanner.start;
+	state.current = scanner.current;
+	state.line = scanner.line;
+	
+	return (state);
+}
+
+void	restoreScanner(Scanner state)
+{
+	scanner.start = state.start;
+	scanner.current = state.current;
+	scanner.line = state.line;
 }
